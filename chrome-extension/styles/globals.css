@@ -1,0 +1,45 @@
+/* Quiet Luxury Color Scheme */
+:root {
+  /* Primary Colors */
+  --primary: #988876; /* Roasted Cashew */
+  --primary-light: #a89886;
+  --primary-dark: #857766;
+  
+  /* Secondary Colors */
+  --secondary: #E8DCC4; /* Frozen Dew */
+  --secondary-light: #f0e8d4;
+  --secondary-dark: #d8ccb4;
+  
+  /* Accent Colors */
+  --accent: #54534F; /* Dark Night */
+  --accent-light: #64635f;
+  --accent-dark: #44433f;
+  
+  /* Neutral Colors */
+  --neutral-grey: #C7C1BE; /* Temple Grey */
+  --neutral-light: #EFEAE5; /* Snowfall */
+  --neutral-dark: #54534F;
+  
+  /* Semantic Colors */
+  --background: #EFEAE5; /* Snowfall */
+  --surface: #FFFFFF;
+  --text-primary: #54534F; /* Dark Night */
+  --text-secondary: #988876; /* Roasted Cashew */
+  --text-light: #C7C1BE; /* Temple Grey */
+  
+  /* Border Colors */
+  --border: #C7C1BE;
+  --border-light: #E8DCC4;
+  --border-dark: #54534F;
+}
+
+/* Optional: Dark mode variants */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #54534F;
+    --surface: #44433f;
+    --text-primary: #EFEAE5;
+    --text-secondary: #E8DCC4;
+    --text-light: #C7C1BE;
+  }
+}
