@@ -1,6 +1,323 @@
 @import './globals.css';
 
-/* All setup styles scoped to extension root */
+/* Setup styles for popup */
+.setup-container {
+  padding: 24px;
+  max-width: 400px;
+  min-width: 350px;
+  background-color: white;
+  border-radius: 15px;
+  display: block;
+  box-sizing: border-box;
+  font-family: var(--font-text);
+}
+
+.setup-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  transition: color 0.2s ease;
+  z-index: 10;
+  font-family: var(--font-text);
+}
+
+.setup-close:hover {
+  color: #333;
+}
+
+.setup-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #000;
+  margin: 0 0 8px 0;
+  text-align: center;
+  display: block;
+  font-family: var(--font-title);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.setup-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px 0;
+  text-align: center;
+  display: block;
+  font-family: var(--font-text);
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.setup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 550;
+  color: #000;
+  margin: 0;
+  display: block;
+  font-family: var(--font-title);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dropzone Styles */
+.dropzone {
+  border: 2px dashed #d0d0d0;
+  border-radius: 8px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  background-color: white;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dropzone:hover {
+  border-color: #999;
+}
+
+.dropzone-active {
+  border-color: #999;
+}
+
+.dropzone-has-image {
+  padding: 8px;
+  border: 2px solid #ddd;
+  background-color: white;
+  cursor: pointer;
+}
+
+.dropzone-has-image:hover {
+  border-color: var(--primary);
+}
+
+.dropzone-processing {
+  border-color: #999;
+  cursor: wait;
+}
+
+.dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dropzone-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.dropzone-icon {
+  width: 48px;
+  height: 48px;
+  color: #999;
+  display: block;
+}
+
+.dropzone-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #666;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: block;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.dropzone-text {
+  font-size: 14px;
+  color: #333;
+  margin: 0 0 4px 0;
+  line-height: 1.4;
+  display: block;
+  font-weight: 400;
+  font-family: var(--font-text);
+}
+
+.dropzone-subtext {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+  line-height: 1.4;
+  display: block;
+  font-weight: 400;
+  font-family: var(--font-text);
+}
+
+.preview-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: block;
+}
+
+.preview-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.dropzone-has-image:hover .preview-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.preview-change-text {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  margin: 0;
+  display: block;
+  font-family: var(--font-text);
+}
+
+.dropzone-has-image:hover .preview-change-text {
+  opacity: 1;
+}
+
+/* Input Styles */
+.setup-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border: 2px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--surface);
+  transition: all 0.2s ease;
+  outline: none;
+  display: block;
+  font-family: var(--font-text);
+}
+
+.setup-input:focus {
+  border-color: var(--primary);
+  background-color: var(--surface);
+}
+
+.setup-input::placeholder {
+  color: var(--text-light);
+}
+
+/* Fix autofill styles */
+.setup-input:-webkit-autofill,
+.setup-input:-webkit-autofill:hover,
+.setup-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  border-color: var(--border-light) !important;
+}
+
+.setup-input:-webkit-autofill:focus {
+  border-color: var(--primary) !important;
+}
+
+/* Button Styles */
+.setup-button {
+  padding: 14px 24px;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: block;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  font-family: var(--font-text);
+}
+
+.setup-button:hover {
+  background-color: var(--accent-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.setup-button:active {
+  transform: translateY(0);
+}
+
+.setup-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.error-message {
+  padding: 12px;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+  font-size: 13px;
+  text-align: center;
+  display: block;
+  box-sizing: border-box;
+  font-family: var(--font-text);
+}
+
+/* All setup styles scoped to content script overlay root */
 #plasmo-image-overlay-root .setup-container {
   all: initial !important;
   padding: 24px !important;
@@ -316,6 +633,11 @@
 
 #plasmo-image-overlay-root .setup-button:active {
   transform: translateY(0) !important;
+}
+
+#plasmo-image-overlay-root .setup-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
 }
 
 /* Error Message */
