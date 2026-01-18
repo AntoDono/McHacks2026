@@ -20,15 +20,31 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
   const [selectedImageGallery, setSelectedImageGallery] = useState<string[]>([])
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true) // Auto-play enabled by default
+  const [autoPlayInterval] = useState(500) // 2 seconds between images
 
   useEffect(() => {
     setImages(productImages)
   }, [productImages])
 
-  // Reset to first image when new results come in
+  // Reset to first image and start auto-play when new results come in
   useEffect(() => {
     setCurrentImageIndex(0)
+    setIsAutoPlaying(true)
   }, [tryOnResultImages])
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (!isAutoPlaying || tryOnResultImages.length <= 1) return
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => 
+        prev === tryOnResultImages.length - 1 ? 0 : prev + 1
+      )
+    }, autoPlayInterval)
+
+    return () => clearInterval(interval)
+  }, [isAutoPlaying, tryOnResultImages.length, autoPlayInterval])
 
   const handleRemoveImage = (indexToRemove: number) => {
     const newImages = images.filter((_, index) => index !== indexToRemove)
@@ -43,6 +59,7 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
 
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation()
+    setIsAutoPlaying(false) // Pause auto-play when user manually navigates
     setCurrentImageIndex((prev) => 
       prev === 0 ? tryOnResultImages.length - 1 : prev - 1
     )
@@ -50,9 +67,15 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
 
   const handleNextImage = (e: React.MouseEvent) => {
     e.stopPropagation()
+    setIsAutoPlaying(false) // Pause auto-play when user manually navigates
     setCurrentImageIndex((prev) => 
       prev === tryOnResultImages.length - 1 ? 0 : prev + 1
     )
+  }
+
+  const toggleAutoPlay = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsAutoPlaying((prev) => !prev)
   }
 
   const hasMultipleResults = tryOnResultImages.length > 1
@@ -179,18 +202,29 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
               )}
               
               {hasMultipleResults && (
-                <div className="virtual-try-on-carousel-dots">
-                  {tryOnResultImages.map((_, index) => (
-                    <button
-                      key={index}
-                      className={`virtual-try-on-carousel-dot ${index === currentImageIndex ? 'active' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setCurrentImageIndex(index)
-                      }}
-                      aria-label={`View ${index + 1}`}
-                    />
-                  ))}
+                <div className="virtual-try-on-carousel-controls">
+                  <button
+                    className="virtual-try-on-autoplay-button"
+                    onClick={toggleAutoPlay}
+                    aria-label={isAutoPlaying ? "Pause slideshow" : "Play slideshow"}
+                    title={isAutoPlaying ? "Pause slideshow" : "Play slideshow"}
+                  >
+                    {isAutoPlaying ? "⏸" : "▶"}
+                  </button>
+                  <div className="virtual-try-on-carousel-dots">
+                    {tryOnResultImages.map((_, index) => (
+                      <button
+                        key={index}
+                        className={`virtual-try-on-carousel-dot ${index === currentImageIndex ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setIsAutoPlaying(false) // Pause when user clicks a dot
+                          setCurrentImageIndex(index)
+                        }}
+                        aria-label={`View ${index + 1}`}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

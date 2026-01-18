@@ -24,9 +24,12 @@ _gumloop_client = None
 
 prompts = {
     0: "Make this person face the front. Keep the background transparent or white.",
-    90: "Make this person face the left side. Keep the background transparent or white.",
+    45: "Rotate this person 45 degrees to face the front-right diagonal. Keep the background transparent or white.",
+    90: "Make this person face the right side. Keep the background transparent or white.",
+    135: "Rotate this person 135 degrees to face the back-right diagonal. Keep the background transparent or white.",
     180: "Make this person face the back. Keep the background transparent or white.",
-    270: "Make this person face the right side. Keep the background transparent or white.",
+    225: "Rotate this person 225 degrees to face the back-left diagonal. Keep the background transparent or white.",
+    270: "Make this person face the left side. Keep the background transparent or white.",
 }
 
 
@@ -113,7 +116,7 @@ def _upload_to_cloudinary(image_path):
 
 
 def _generate_views_gumloop(image_path, output_dir):
-    """Generate 4 views using Gumloop API"""
+    """Generate 7 views using Gumloop API"""
     global _gumloop_client
     
     try:
@@ -141,8 +144,8 @@ def _generate_views_gumloop(image_path, output_dir):
         inputs={"image": image_url}
     )
     
-    # Download images in sorted order: 0, 90, 180, 270
-    angles = [0, 90, 180, 270]
+    # Download images in sorted order: 0, 45, 90, 135, 180, 225, 270
+    angles = [0, 45, 90, 135, 180, 225, 270]
     downloaded_paths = []
     
     for angle in angles:
@@ -164,7 +167,7 @@ def _generate_views_gumloop(image_path, output_dir):
 
 def generate_views(image_path):
     """
-    Generate 4 camera views from a single image: [0°, 90°, 180°, 270°]
+    Generate 7 camera views from a single image: [0°, 45°, 90°, 135°, 180°, 225°, 270°]
     
     Uses Gumloop if USE_GUMLOOP=True, otherwise uses Gemini.
     """
@@ -201,7 +204,7 @@ if __name__ == "__main__":
     print("=" * 60)
     print(f"Multi-View Generator ({method})")
     print("=" * 60)
-    print(f"\nGenerating 4 views from: {image_path}")
+    print(f"\nGenerating 7 views from: {image_path}")
     print("-" * 60)
     
     results = generate_views(image_path)
@@ -215,5 +218,5 @@ if __name__ == "__main__":
             print(f"  {angle:>3}°: FAILED")
     
     print("\n" + "=" * 60)
-    print(f"✓ Complete - {len(results)}/4 successful")
+    print(f"✓ Complete - {len(results)}/7 successful")
     print("=" * 60)

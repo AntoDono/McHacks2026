@@ -45,6 +45,9 @@ function IndexPopup() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
   const [selectedImageGallery, setSelectedImageGallery] = useState<string[]>([])
+  const [currentFitIndex, setCurrentFitIndex] = useState(0)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [autoPlayInterval] = useState(500) // 500ms between images
 
   // Check if user is setup on load
   useEffect(() => {
@@ -87,6 +90,8 @@ function IndexPopup() {
       const data = await response.json()
       if (data.success) {
         setSelectedSession(data.session)
+        setCurrentFitIndex(0) // Reset to first image
+        setIsAutoPlaying(true) // Start auto-play
       }
     } catch (error) {
       console.error("Error loading session detail:", error)
@@ -94,6 +99,19 @@ function IndexPopup() {
       setLoadingDetail(false)
     }
   }
+
+  // Auto-play functionality for generated fits carousel
+  useEffect(() => {
+    if (!selectedSession || !isAutoPlaying || selectedSession.generated_images.length <= 1) return
+
+    const interval = setInterval(() => {
+      setCurrentFitIndex((prev) => 
+        prev === selectedSession.generated_images.length - 1 ? 0 : prev + 1
+      )
+    }, autoPlayInterval)
+
+    return () => clearInterval(interval)
+  }, [isAutoPlaying, selectedSession?.generated_images.length, autoPlayInterval, selectedSession])
 
   const handleSessionClick = (session: TryOnSession) => {
     loadSessionDetail(session.timestamp)
@@ -105,6 +123,27 @@ function IndexPopup() {
 
   const handleGarmentClick = (garment: SessionDetail['garments'][0]) => {
     setSelectedGarment(garment)
+  }
+
+  const handlePrevFit = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsAutoPlaying(false)
+    setCurrentFitIndex((prev) => 
+      prev === 0 ? (selectedSession?.generated_images.length || 1) - 1 : prev - 1
+    )
+  }
+
+  const handleNextFit = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsAutoPlaying(false)
+    setCurrentFitIndex((prev) => 
+      prev === (selectedSession?.generated_images.length || 1) - 1 ? 0 : prev + 1
+    )
+  }
+
+  const toggleAutoPlay = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsAutoPlaying((prev) => !prev)
   }
 
   // Handle opening image modal with context
@@ -252,32 +291,80 @@ function IndexPopup() {
                 </div>
               </div>
 
-              {/* Generated Fits */}
+              {/* Generated Fits Carousel */}
               <div className="popup-detail-section">
                 <h3 className="popup-detail-section-title">
                   Generated Fits ({selectedSession.generated_images.length})
                 </h3>
-                <div className="popup-fits-grid">
-                  {selectedSession.generated_images.map((fit, idx) => (
-                    <div 
-                      key={idx} 
-                      className="popup-fit-card"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => {
-                        const fitImages = selectedSession.generated_images.map(f => f.image)
-                        handleImageClick(fit.image, fitImages, idx)
-                      }}
+                <div className="popup-fits-carousel">
+                  {selectedSession.generated_images.length > 1 && (
+                    <button 
+                      className="popup-carousel-arrow popup-carousel-prev"
+                      onClick={handlePrevFit}
+                      aria-label="Previous view"
                     >
-                      <img
-                        src={fit.image}
-                        alt={`Fit ${idx + 1}`}
-                        className="popup-fit-image"
-                      />
-                      {fit.is_main && (
-                        <span className="popup-fit-main-badge">Main</span>
-                      )}
+                      ‹
+                    </button>
+                  )}
+                  
+                  <div 
+                    className="popup-fit-display"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      const fitImages = selectedSession.generated_images.map(f => f.image)
+                      handleImageClick(
+                        selectedSession.generated_images[currentFitIndex].image, 
+                        fitImages, 
+                        currentFitIndex
+                      )
+                    }}
+                  >
+                    <img
+                      src={selectedSession.generated_images[currentFitIndex].image}
+                      alt={`Fit ${currentFitIndex + 1}`}
+                      className="popup-fit-carousel-image"
+                    />
+                    {selectedSession.generated_images[currentFitIndex].is_main && (
+                      <span className="popup-fit-main-badge">Main</span>
+                    )}
+                  </div>
+                  
+                  {selectedSession.generated_images.length > 1 && (
+                    <button 
+                      className="popup-carousel-arrow popup-carousel-next"
+                      onClick={handleNextFit}
+                      aria-label="Next view"
+                    >
+                      ›
+                    </button>
+                  )}
+                  
+                  {selectedSession.generated_images.length > 1 && (
+                    <div className="popup-carousel-controls">
+                      <button
+                        className="popup-autoplay-button"
+                        onClick={toggleAutoPlay}
+                        aria-label={isAutoPlaying ? "Pause slideshow" : "Play slideshow"}
+                        title={isAutoPlaying ? "Pause slideshow" : "Play slideshow"}
+                      >
+                        {isAutoPlaying ? "⏸" : "▶"}
+                      </button>
+                      <div className="popup-carousel-dots">
+                        {selectedSession.generated_images.map((_, index) => (
+                          <button
+                            key={index}
+                            className={`popup-carousel-dot ${index === currentFitIndex ? 'active' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setIsAutoPlaying(false)
+                              setCurrentFitIndex(index)
+                            }}
+                            aria-label={`View ${index + 1}`}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </>

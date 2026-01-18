@@ -362,12 +362,52 @@
   right: -20px !important;
 }
 
+#plasmo-image-overlay-root .virtual-try-on-carousel-controls {
+  all: initial !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  margin-top: 8px !important;
+  box-sizing: border-box !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-autoplay-button {
+  all: initial !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background-color: var(--primary) !important;
+  color: var(--surface) !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: var(--shadow-sm) !important;
+  box-sizing: border-box !important;
+  font-family: var(--font-text) !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-autoplay-button:hover {
+  background-color: var(--primary-dark) !important;
+  transform: scale(1.1) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-autoplay-button:active {
+  transform: scale(0.95) !important;
+}
+
 #plasmo-image-overlay-root .virtual-try-on-carousel-dots {
   all: initial !important;
   display: flex !important;
   gap: 8px !important;
   justify-content: center !important;
-  margin-top: 8px !important;
   box-sizing: border-box !important;
 }
 

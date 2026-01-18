@@ -416,6 +416,137 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* Fits Carousel */
+.popup-fits-carousel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  padding: 0 30px; /* Space for arrows inside */
+}
+
+.popup-fit-display {
+  position: relative;
+  width: 100%;
+  max-width: 200px; /* Reduced from 350px */
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.popup-fit-display:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
+}
+
+.popup-fit-carousel-image {
+  width: 100%;
+  max-height: 250px; /* Limit height */
+  object-fit: contain;
+  display: block;
+  background-color: var(--neutral-light);
+}
+
+.popup-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px; /* Reduced from 40px */
+  height: 32px;
+  background-color: var(--overlay-black-60);
+  color: var(--text-on-dark);
+  border: none;
+  border-radius: 50%;
+  font-size: 20px; /* Reduced from 24px */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.popup-carousel-arrow:hover {
+  background-color: var(--overlay-black-80);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.popup-carousel-prev {
+  left: 0; /* Changed from -20px to fit inside */
+}
+
+.popup-carousel-next {
+  right: 0; /* Changed from -20px to fit inside */
+}
+
+.popup-carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.popup-autoplay-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: var(--surface);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  padding: 0;
+  line-height: 1;
+}
+
+.popup-autoplay-button:hover {
+  background-color: var(--primary-dark);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+.popup-autoplay-button:active {
+  transform: scale(0.95);
+}
+
+.popup-carousel-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.popup-carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--border-light);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.popup-carousel-dot:hover {
+  background-color: var(--neutral-grey);
+}
+
+.popup-carousel-dot.active {
+  background-color: var(--primary);
+  transform: scale(1.2);
+}
+
 /* Garment Detail Modal */
 .popup-modal-overlay {
   position: fixed;

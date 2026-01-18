@@ -5,8 +5,8 @@ flask
 flask-cors
 requests
 rembg[cpu]
-peewee
+pymongo
+dnspython
 numpy
 cloudinary
-gumloop
 gumloop

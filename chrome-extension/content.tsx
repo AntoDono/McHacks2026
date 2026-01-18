@@ -169,22 +169,21 @@ const ContentScript = () => {
       // Extract product metadata from the current page
       const baseMetadata = extractProductMetadata(imageUrl)
       
-      // Fetch and convert to base64 immediately (while we have access)
+      // Fetch, resize, and convert to base64 immediately (while we have access)
       let base64Data: string | null = null
       try {
         const response = await fetch(imageUrl)
         const blob = await response.blob()
         
-        // Convert to base64
-        const reader = new FileReader()
-        base64Data = await new Promise<string>((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result as string)
-          reader.onerror = reject
-          reader.readAsDataURL(blob)
-        })
-        console.log(`✓ Encoded image to base64 (${Math.round(base64Data.length / 1024)}KB)`)
+        // Resize the image before converting to base64 (max 1500x1500)
+        const resizedBlob = await resizeImage(blob, 500, 500, 0.9)
+        
+        // Convert resized blob to base64
+        base64Data = await blobToBase64(resizedBlob)
+        
+        console.log(`✓ Resized and encoded image to base64 (${Math.round(base64Data.length / 1024)}KB)`)
       } catch (error) {
-        console.error(`Failed to fetch/encode image:`, error)
+        console.error(`Failed to fetch/resize/encode image:`, error)
         // Continue without base64, URL will be fallback
       }
       
