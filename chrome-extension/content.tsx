@@ -2,15 +2,17 @@ import type { PlasmoCSConfig, PlasmoGetRootContainer } from "plasmo"
 import { useEffect, useState } from "react"
 
 import { getGalleryImages } from "~utils/gallery-detection"
-import { saveGalleryImages, getUserData } from "~utils/storage"
+import { getUserData, getCartItems, addToCart, removeFromCart, saveCartItems } from "~utils/storage"
 import type { UserData } from "~types/user"
 import VirtualTryOnPanel from "~components/VirtualTryOnPanel"
 import TryOnButton from "~components/TryOnButton"
 import Setup from "~components/Setup"
+import Cart from "~components/Cart"
 import { useImageHover } from "~hooks/useImageHover"
 import { useButtonPosition } from "~hooks/useButtonPosition"
 
 import "./styles/content.css"
+import "./styles/cart.css"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -32,7 +34,8 @@ const BUTTON_LEAVE_DELAY = 150
 const ContentScript = () => {
   const [isHoveringButton, setIsHoveringButton] = useState(false)
   const [showVirtualTryOnPanel, setShowVirtualTryOnPanel] = useState(false)
-  const [selectedImages, setSelectedImages] = useState<string[]>([])
+  const [showCart, setShowCart] = useState(false)
+  const [cartItems, setCartItems] = useState<string[]>([])
   const [userData, setUserData] = useState<UserData | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
   const [tryOnResultImages, setTryOnResultImages] = useState<string[]>([])
@@ -41,19 +44,24 @@ const ContentScript = () => {
   const { hoveredImage, setHoveredImage, clearHideTimeout } = useImageHover(isHoveringButton)
   const buttonPosition = useButtonPosition(hoveredImage)
 
-  // Load user data on mount
+  // Load user data and cart on mount
   useEffect(() => {
-    const loadUserData = async () => {
+    const loadData = async () => {
       try {
-        const data = await getUserData()
+        const [data, items] = await Promise.all([getUserData(), getCartItems()])
         setUserData(data)
+        setCartItems(items)
+        // Show cart if there are items
+        if (items.length > 0) {
+          setShowCart(true)
+        }
       } catch (error) {
-        console.error("Error loading user data:", error)
+        console.error("Error loading data:", error)
       } finally {
         setIsLoadingUser(false)
       }
     }
-    loadUserData()
+    loadData()
   }, [])
 
   const handleButtonMouseEnter = () => {
@@ -76,42 +84,49 @@ const ContentScript = () => {
       console.log("Found gallery images:", galleryImages.length, galleryImages)
 
       if (galleryImages.length > 0) {
-        // Add new images to existing array, avoiding duplicates
-        const newImages = galleryImages.filter(img => !selectedImages.includes(img))
-        const updatedImages = [...selectedImages, ...newImages]
+        // Add all gallery images to cart
+        let updatedCart = [...cartItems]
+        let addedCount = 0
         
-        await saveGalleryImages(updatedImages)
-        console.log("Gallery images saved successfully:", updatedImages.length, "images")
-
-        // Update badge to show new images
-        try {
-          chrome.runtime.sendMessage(
-            {
-              type: "GALLERY_IMAGES_UPDATED",
-              images: updatedImages,
-              count: updatedImages.length
-            },
-            (response) => {
-              if (chrome.runtime.lastError) {
-                console.log("Message failed (this is normal):", chrome.runtime.lastError.message)
-              }
-            }
-          )
-        } catch (err) {
-          console.log("Could not send message (this is normal)")
+        for (const imageUrl of galleryImages) {
+          if (!updatedCart.includes(imageUrl)) {
+            updatedCart.push(imageUrl)
+            addedCount++
+          }
         }
-
-        // Update selected images and show sidebar
-        setSelectedImages(updatedImages)
-        setShowVirtualTryOnPanel(true)
-        console.log("Opening panel, userData:", userData, "isSetup:", userData?.isSetup)
+        
+        if (addedCount > 0) {
+          await saveCartItems(updatedCart)
+          setCartItems(updatedCart)
+          setShowCart(true)
+          console.log(`Added ${addedCount} item(s) to cart. Total: ${updatedCart.length}`)
+          
+          // Update badge
+          try {
+            chrome.runtime.sendMessage(
+              {
+                type: "CART_UPDATED",
+                count: updatedCart.length
+              },
+              (response) => {
+                if (chrome.runtime.lastError) {
+                  console.log("Message failed (this is normal):", chrome.runtime.lastError.message)
+                }
+              }
+            )
+          } catch (err) {
+            console.log("Could not send message (this is normal)")
+          }
+        } else {
+          console.log("All images already in cart")
+        }
         
         setHoveredImage(null)
       } else {
         console.warn("No gallery images found - only found the clicked image")
       }
     } catch (error) {
-      console.error("Error saving gallery images:", error)
+      console.error("Error adding to cart:", error)
     }
   }
 
@@ -125,15 +140,22 @@ const ContentScript = () => {
     }
   }
 
-  const handleStartVirtualTryOn = async () => {
+  const handleTryItOn = async () => {
+    // Check if user is set up
+    if (!userData || !userData.isSetup) {
+      // Show setup panel
+      setShowVirtualTryOnPanel(true)
+      return
+    }
+
     // Check if we have required data
-    if (!userData?.photo) {
+    if (!userData.photo) {
       alert("Please set up your profile photo first")
       return
     }
 
-    if (!selectedImages || selectedImages.length === 0) {
-      alert("Please select at least one product image")
+    if (!cartItems || cartItems.length === 0) {
+      alert("Please add at least one product to your cart")
       return
     }
 
@@ -145,25 +167,30 @@ const ContentScript = () => {
 
       console.log("Starting virtual try-on...")
       console.log("User photo:", userData.photo.substring(0, 50) + "...")
-      console.log("Product image:", selectedImages[0])
+      console.log(`Cart items: ${cartItems.length} item(s)`, cartItems)
 
       // Convert base64 photo to Blob
       const photoBase64 = userData.photo.replace(/^data:image\/[a-z]+;base64,/, "")
       const photoBlob = await fetch(`data:image/png;base64,${photoBase64}`).then(res => res.blob())
       const photoFile = new File([photoBlob], "person.png", { type: "image/png" })
 
-      // Get first product image
-      const productImageUrl = selectedImages[0]
-      
-      // Fetch product image and convert to File
-      const productResponse = await fetch(productImageUrl)
-      const productBlob = await productResponse.blob()
-      const productFile = new File([productBlob], "garment.jpg", { type: productBlob.type || "image/jpeg" })
-
       // Create FormData
       const formData = new FormData()
       formData.append("person", photoFile)
-      formData.append("garment", productFile)
+      
+      // Fetch and append all cart items
+      for (let i = 0; i < cartItems.length; i++) {
+        const productImageUrl = cartItems[i]
+        console.log(`Processing cart item ${i + 1}/${cartItems.length}:`, productImageUrl)
+        
+        // Fetch product image and convert to File
+        const productResponse = await fetch(productImageUrl)
+        const productBlob = await productResponse.blob()
+        const productFile = new File([productBlob], `garment_${i}.jpg`, { type: productBlob.type || "image/jpeg" })
+        
+        // Append each garment with the same key name (backend will collect them all)
+        formData.append("garment", productFile)
+      }
 
       // Call try-on API
       console.log("Calling try-on API:", `${API_URL}/try-on`)
@@ -187,6 +214,7 @@ const ContentScript = () => {
         const images = data.images || [data.image]
         console.log(`Generated ${images.length} view(s)`)
         setTryOnResultImages(images)
+        setShowVirtualTryOnPanel(true)
       }
 
     } catch (error) {
@@ -195,6 +223,20 @@ const ContentScript = () => {
     } finally {
       setIsLoadingTryOn(false)
     }
+  }
+
+  const handleRemoveFromCart = async (index: number) => {
+    try {
+      const updatedCart = await removeFromCart(index)
+      setCartItems(updatedCart)
+      console.log(`Removed item ${index}. Cart now has ${updatedCart.length} items`)
+    } catch (error) {
+      console.error("Error removing from cart:", error)
+    }
+  }
+
+  const handleCloseCart = () => {
+    setShowCart(false)
   }
 
   if (isLoadingUser) {
@@ -209,6 +251,16 @@ const ContentScript = () => {
           onMouseEnter={handleButtonMouseEnter}
           onMouseLeave={handleButtonMouseLeave}
           onClick={handleButtonClick}
+        />
+      )}
+
+      {showCart && (
+        <Cart
+          items={cartItems}
+          onRemoveItem={handleRemoveFromCart}
+          onTryItOn={handleTryItOn}
+          onClose={handleCloseCart}
+          isLoading={isLoadingTryOn}
         />
       )}
 
@@ -235,16 +287,16 @@ const ContentScript = () => {
           ) : (
             <VirtualTryOnPanel
               userData={userData}
-              productImages={selectedImages}
+              productImages={cartItems}
               tryOnResultImages={tryOnResultImages}
               isLoading={isLoadingTryOn}
-              onStartVirtualTryOn={handleStartVirtualTryOn}
+              onStartVirtualTryOn={handleTryItOn}
               onClose={() => {
                 setShowVirtualTryOnPanel(false)
                 setTryOnResultImages([])
                 setIsLoadingTryOn(false)
               }}
-              onImagesChange={(images) => setSelectedImages(images)}
+              onImagesChange={(images) => setCartItems(images)}
             />
           )}
         </>

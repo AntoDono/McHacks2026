@@ -130,3 +130,76 @@ export const clearGalleryImages = async (): Promise<void> => {
     })
   })
 }
+
+/**
+ * Storage key for cart items
+ */
+export const CART_ITEMS_KEY = 'cart_items'
+
+/**
+ * Save cart items to Chrome local storage
+ */
+export const saveCartItems = async (items: string[]): Promise<void> => {
+  try {
+    await storageSet({ [CART_ITEMS_KEY]: items })
+    console.log(`Cart saved: ${items.length} items`)
+  } catch (error) {
+    console.error("Error saving cart items:", error)
+    throw error
+  }
+}
+
+/**
+ * Get cart items from Chrome local storage
+ */
+export const getCartItems = async (): Promise<string[]> => {
+  try {
+    const result = await storageGet<string[]>([CART_ITEMS_KEY])
+    const items = result[CART_ITEMS_KEY] as string[] | undefined
+    return items || []
+  } catch (error) {
+    console.error("Error retrieving cart items:", error)
+    throw error
+  }
+}
+
+/**
+ * Add item to cart
+ */
+export const addToCart = async (imageUrl: string): Promise<string[]> => {
+  const currentItems = await getCartItems()
+  // Avoid duplicates
+  if (!currentItems.includes(imageUrl)) {
+    const updatedItems = [...currentItems, imageUrl]
+    await saveCartItems(updatedItems)
+    return updatedItems
+  }
+  return currentItems
+}
+
+/**
+ * Remove item from cart by index
+ */
+export const removeFromCart = async (index: number): Promise<string[]> => {
+  const currentItems = await getCartItems()
+  const updatedItems = currentItems.filter((_, i) => i !== index)
+  await saveCartItems(updatedItems)
+  return updatedItems
+}
+
+/**
+ * Clear cart items from storage
+ */
+export const clearCart = async (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.remove([CART_ITEMS_KEY], () => {
+      if (chrome.runtime.lastError) {
+        console.error("Error clearing cart:", chrome.runtime.lastError)
+        reject(chrome.runtime.lastError)
+      } else {
+        console.log("Cart cleared")
+        resolve()
+      }
+    })
+  })
+}

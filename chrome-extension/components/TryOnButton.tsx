@@ -35,7 +35,7 @@ const TryOnButton = ({ position, onMouseEnter, onMouseLeave, onClick }: TryOnBut
         onClick={handleClick}
         onMouseDown={createStopPropagationHandler()}
       >
-        Try this on
+        Add to Try
       </button>
     </div>
   )
