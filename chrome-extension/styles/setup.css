@@ -10,7 +10,7 @@
   border-radius: 15px !important;
   display: block !important;
   box-sizing: border-box !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-text) !important;
 }
 
 #plasmo-image-overlay-root .setup-close {
@@ -27,7 +27,7 @@
   padding: 4px 8px !important;
   transition: color 0.2s ease !important;
   z-index: 10 !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-text) !important;
 }
 
 #plasmo-image-overlay-root .setup-close:hover {
@@ -42,7 +42,9 @@
   margin: 0 0 8px 0 !important;
   text-align: center !important;
   display: block !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-title) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
 #plasmo-image-overlay-root .setup-subtitle {
@@ -52,7 +54,7 @@
   margin: 0 0 24px 0 !important;
   text-align: center !important;
   display: block !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-text) !important;
 }
 
 #plasmo-image-overlay-root .setup-form {
@@ -76,11 +78,13 @@
 #plasmo-image-overlay-root .section-title {
   all: initial !important;
   font-size: 16px !important;
-  font-weight: 500 !important;
+  font-weight: 550 !important;
   color: #000 !important;
   margin: 0 !important;
   display: block !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-title) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
 /* Dropzone Styles */
@@ -176,7 +180,7 @@
   line-height: 1.4 !important;
   display: block !important;
   font-weight: 400 !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-text) !important;
 }
 
 #plasmo-image-overlay-root .dropzone-subtext {
@@ -187,7 +191,7 @@
   line-height: 1.4 !important;
   display: block !important;
   font-weight: 400 !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-text) !important;
 }
 
 #plasmo-image-overlay-root .preview-container {
@@ -239,7 +243,7 @@
   transition: opacity 0.3s ease !important;
   margin: 0 !important;
   display: block !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-text) !important;
 }
 
 #plasmo-image-overlay-root .dropzone-has-image:hover .preview-change-text {
@@ -260,7 +264,7 @@
   transition: all 0.2s ease !important;
   outline: none !important;
   display: block !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-text) !important;
 }
 
 #plasmo-image-overlay-root .setup-input:focus {
@@ -301,7 +305,7 @@
   width: 100% !important;
   text-align: center !important;
   box-sizing: border-box !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-text) !important;
 }
 
 #plasmo-image-overlay-root .setup-button:hover {
@@ -326,5 +330,5 @@
   text-align: center !important;
   display: block !important;
   box-sizing: border-box !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-family: var(--font-text) !important;
 }
