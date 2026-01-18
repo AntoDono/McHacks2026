@@ -11,6 +11,7 @@ import Cart from "~components/Cart"
 import { useImageHover } from "~hooks/useImageHover"
 import { useButtonPosition } from "~hooks/useButtonPosition"
 import { extractProductMetadata } from "~utils/product-detection/attributes"
+import { resizeImage, blobToBase64 } from "~utils/imageResize"
 
 import "./styles/content.css"
 import "./styles/cart.css"
@@ -41,6 +42,7 @@ const ContentScript = () => {
   const [isLoadingUser, setIsLoadingUser] = useState(true)
   const [tryOnResultImages, setTryOnResultImages] = useState<string[]>([])
   const [isLoadingTryOn, setIsLoadingTryOn] = useState(false)
+  const [tryOnProgress, setTryOnProgress] = useState({ message: "", progress: 0 })
 
   const { hoveredImage, setHoveredImage, clearHideTimeout } = useImageHover(isHoveringButton)
   const buttonPosition = useButtonPosition(hoveredImage)
@@ -96,22 +98,20 @@ const ContentScript = () => {
           if (!updatedCart.some(item => item.imageUrl === imageUrl)) {
             console.log(`Fetching and encoding image: ${imageUrl}`)
             
-            // Fetch and convert to base64 immediately (while we have access)
+            // Fetch, resize, and convert to base64 immediately (while we have access)
             let base64Data: string | null = null
             try {
               const response = await fetch(imageUrl)
               const blob = await response.blob()
               
+              // Resize image to max 500x500 to reduce payload size
+              const resizedBlob = await resizeImage(blob, 500, 500, 0.85)
+              
               // Convert to base64
-              const reader = new FileReader()
-              base64Data = await new Promise<string>((resolve, reject) => {
-                reader.onloadend = () => resolve(reader.result as string)
-                reader.onerror = reject
-                reader.readAsDataURL(blob)
-              })
-              console.log(`✓ Encoded image to base64 (${Math.round(base64Data.length / 1024)}KB)`)
+              base64Data = await blobToBase64(resizedBlob)
+              console.log(`✓ Resized and encoded image to base64 (${Math.round(base64Data.length / 1024)}KB)`)
             } catch (error) {
-              console.error(`Failed to fetch/encode image:`, error)
+              console.error(`Failed to fetch/resize/encode image:`, error)
               // Continue without base64, URL will be fallback
             }
             
@@ -194,12 +194,13 @@ const ContentScript = () => {
     }
 
     setIsLoadingTryOn(true)
+    setTryOnProgress({ message: "Starting...", progress: 0 })
 
     try {
       // Get API URL from environment
       const API_URL = process.env.PLASMO_PUBLIC_API_URL || `http://localhost:${process.env.PLASMO_PUBLIC_PORT || 8080}`
 
-      console.log("Starting virtual try-on...")
+      console.log("Starting virtual try-on with SSE...")
       console.log("User photo:", userData.photo.substring(0, 50) + "...")
       console.log(`Cart items: ${cartItems.length} item(s)`, cartItems)
 
@@ -247,34 +248,78 @@ const ContentScript = () => {
       // Add metadata as JSON string
       formData.append("garments_metadata", JSON.stringify(garmentsMetadata))
 
-      // Call try-on API
-      console.log("Calling try-on API:", `${API_URL}/try-on`)
-      const response = await fetch(`${API_URL}/try-on`, {
+      // Upload data first, then use SSE for streaming updates
+      console.log("Uploading data to SSE endpoint:", `${API_URL}/try-on-stream`)
+      const response = await fetch(`${API_URL}/try-on-stream`, {
         method: "POST",
         body: formData
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to generate try-on image")
+        throw new Error("Failed to start try-on stream")
       }
 
-      const data = await response.json()
-      console.log("Try-on result:", data)
+      // Read SSE stream
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
 
-      // Display the result images
-      if (data.success && (data.images || data.image)) {
-        console.log("✓ Try-on images generated successfully:", data.filename)
-        // Use images array if available, otherwise fallback to single image
-        const images = data.images || [data.image]
-        console.log(`Generated ${images.length} view(s)`)
-        setTryOnResultImages(images)
-        setShowVirtualTryOnPanel(true)
+      if (!reader) {
+        throw new Error("No response body")
+      }
+
+      while (true) {
+        const { done, value } = await reader.read()
+        
+        if (done) {
+          break
+        }
+
+        const chunk = decoder.decode(value, { stream: true })
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6))
+              
+              if (data.type === 'status') {
+                setTryOnProgress({ message: data.message, progress: data.progress })
+                console.log(`Progress: ${data.progress}% - ${data.message}`)
+              } else if (data.type === 'complete') {
+                setTryOnProgress({ message: data.message, progress: 100 })
+                console.log("✓ Try-on completed:", data.filename)
+                
+                // Fetch the images from the result endpoint (too large for SSE)
+                try {
+                  const resultResponse = await fetch(`${API_URL}/try-on-result/${data.timestamp}`)
+                  if (!resultResponse.ok) {
+                    throw new Error("Failed to fetch try-on results")
+                  }
+                  const resultData = await resultResponse.json()
+                  
+                  // Use images array if available
+                  const images = resultData.images || [resultData.image]
+                  console.log(`Generated ${images.length} view(s)`)
+                  setTryOnResultImages(images)
+                  setShowVirtualTryOnPanel(true)
+                } catch (fetchError) {
+                  console.error("Error fetching result images:", fetchError)
+                  throw new Error("Failed to load result images")
+                }
+              } else if (data.type === 'error') {
+                throw new Error(data.message)
+              }
+            } catch (e) {
+              console.error("Error parsing SSE data:", e)
+            }
+          }
+        }
       }
 
     } catch (error) {
       console.error("Error in virtual try-on:", error)
       alert(`Failed to generate try-on image: ${error instanceof Error ? error.message : "Unknown error"}`)
+      setTryOnProgress({ message: "", progress: 0 })
     } finally {
       setIsLoadingTryOn(false)
     }
@@ -316,6 +361,7 @@ const ContentScript = () => {
           onTryItOn={handleTryItOn}
           onClose={handleCloseCart}
           isLoading={isLoadingTryOn}
+          progress={tryOnProgress}
         />
       )}
 
