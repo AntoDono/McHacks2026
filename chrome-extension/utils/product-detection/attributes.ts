@@ -99,20 +99,36 @@ export function extractProductMetadata(imageUrl: string): ProductMetadata {
 
   // Try to find brand
   const brandSelectors = [
-    '[itemprop="brand"]',
-    '[class*="brand"]',
     'meta[property="og:brand"]',
-    'meta[itemprop="brand"]'
+    'meta[itemprop="brand"]',
+    '[itemprop="brand"] [itemprop="name"]',
+    '[itemprop="brand"]'
   ]
 
   for (const selector of brandSelectors) {
     const element = document.querySelector(selector)
     if (element) {
-      const brand = selector.includes('meta')
+      let brand = selector.includes('meta')
         ? element.getAttribute('content')
         : element.textContent?.trim()
       
-      if (brand && brand.length > 0) {
+      // Validate brand name:
+      // - Must be between 1-100 characters
+      // - Must not contain CSS/HTML patterns (curly braces, angle brackets, etc.)
+      // - Must not contain excessive special characters
+      if (brand && 
+          brand.length > 0 && 
+          brand.length <= 100 &&
+          !brand.includes('{') &&
+          !brand.includes('}') &&
+          !brand.includes('<') &&
+          !brand.includes('>') &&
+          !brand.includes('function') &&
+          !brand.includes('px') &&
+          !brand.includes('margin') &&
+          !brand.includes('display')) {
+        // Clean up extra whitespace
+        brand = brand.replace(/\s+/g, ' ').trim()
         metadata.brand = brand
         break
       }

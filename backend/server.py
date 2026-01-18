@@ -29,6 +29,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Configuration
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100 MB max request size
 BASE_DIR = Path(__file__).parent.resolve()
 UPLOAD_FOLDER = BASE_DIR / "uploads"
 PROCESSED_FOLDER = BASE_DIR / "processed"
