@@ -15,11 +15,32 @@ interface TryOnSession {
   generated_count: number
 }
 
+interface SessionDetail {
+  timestamp: string
+  created_at: string
+  person_image: string
+  garments: Array<{
+    image: string
+    order: number
+    sku?: string
+    url?: string
+    title?: string
+    price?: string
+  }>
+  generated_images: Array<{
+    image: string
+    is_main: boolean
+    view_index: number
+  }>
+}
+
 function IndexPopup() {
   const [isLoading, setIsLoading] = useState(true)
   const [userData, setUserData] = useState<UserData | null>(null)
   const [sessions, setSessions] = useState<TryOnSession[]>([])
   const [loadingSessions, setLoadingSessions] = useState(false)
+  const [selectedSession, setSelectedSession] = useState<SessionDetail | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
 
   // Check if user is setup on load
   useEffect(() => {
@@ -52,6 +73,30 @@ function IndexPopup() {
     } finally {
       setLoadingSessions(false)
     }
+  }
+
+  const loadSessionDetail = async (timestamp: string) => {
+    setLoadingDetail(true)
+    try {
+      const API_URL = process.env.PLASMO_PUBLIC_API_URL || `http://localhost:${process.env.PLASMO_PUBLIC_PORT || 8080}`
+      const response = await fetch(`${API_URL}/sessions/${timestamp}`)
+      const data = await response.json()
+      if (data.success) {
+        setSelectedSession(data.session)
+      }
+    } catch (error) {
+      console.error("Error loading session detail:", error)
+    } finally {
+      setLoadingDetail(false)
+    }
+  }
+
+  const handleSessionClick = (session: TryOnSession) => {
+    loadSessionDetail(session.timestamp)
+  }
+
+  const handleBackToGallery = () => {
+    setSelectedSession(null)
   }
 
   const handleSetupComplete = () => {
@@ -89,6 +134,73 @@ function IndexPopup() {
   // Show setup if user hasn't completed it
   if (!userData?.isSetup) {
     return <Setup onSetupComplete={handleSetupComplete} />
+  }
+
+  // Show session detail view if a session is selected
+  if (selectedSession) {
+    return (
+      <div className="popup-container">
+        <div className="popup-detail-header">
+          <button onClick={handleBackToGallery} className="popup-back-button">
+            ← Back
+          </button>
+          <h2 className="popup-detail-title">Fit Details</h2>
+        </div>
+
+        {loadingDetail ? (
+          <div className="popup-gallery-loading">
+            <p>Loading details...</p>
+          </div>
+        ) : (
+          <>
+            {/* Garments Used */}
+            <div className="popup-detail-section">
+              <h3 className="popup-detail-section-title">
+                Garments Used ({selectedSession.garments.length})
+              </h3>
+              <div className="popup-garments-grid">
+                {selectedSession.garments.map((garment, idx) => (
+                  <div key={idx} className="popup-garment-card">
+                    <img
+                      src={garment.image}
+                      alt={garment.title || `Garment ${idx + 1}`}
+                      className="popup-garment-image"
+                    />
+                    {garment.title && (
+                      <div className="popup-garment-title">{garment.title}</div>
+                    )}
+                    {garment.price && (
+                      <div className="popup-garment-price">{garment.price}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Generated Fits */}
+            <div className="popup-detail-section">
+              <h3 className="popup-detail-section-title">
+                Generated Fits ({selectedSession.generated_images.length})
+              </h3>
+              <div className="popup-fits-grid">
+                {selectedSession.generated_images.map((fit, idx) => (
+                  <div key={idx} className="popup-fit-card">
+                    <img
+                      src={fit.image}
+                      alt={`Fit ${idx + 1}`}
+                      className="popup-fit-image"
+                    />
+                    {fit.is_main && (
+                      <span className="popup-fit-main-badge">Main</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    )
   }
 
   // Main app view (after setup is complete)
@@ -147,7 +259,11 @@ function IndexPopup() {
         ) : (
           <div className="popup-gallery-grid">
             {sessions.map((session) => (
-              <div key={session.timestamp} className="popup-gallery-item">
+              <div 
+                key={session.timestamp} 
+                className="popup-gallery-item"
+                onClick={() => handleSessionClick(session)}
+              >
                 {session.main_image ? (
                   <img
                     src={session.main_image}
