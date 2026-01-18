@@ -1,7 +1,7 @@
 import { useState, useRef, type DragEvent } from "react"
 import { validateFile } from "~utils/fileValidation"
 
-const API_URL = process.env.PLASMO_PUBLIC_API_URL || "http://localhost:8080"
+const API_URL = process.env.PLASMO_PUBLIC_API_URL || `http://localhost:${process.env.PLASMO_PUBLIC_PORT || 8080}`
 
 /**
  * Converts image file to base64

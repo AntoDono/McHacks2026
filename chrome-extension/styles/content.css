@@ -183,12 +183,14 @@
   background-color: white;
   border-radius: 16px;
   padding: 24px;
-  max-width: 800px;
+  max-width: 600px;
+  min-width: 400px;
+  width: auto;
   max-height: 90vh;
-  width: 100%;
   overflow-y: auto;
   position: relative;
   pointer-events: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .try-on-overlay-close {

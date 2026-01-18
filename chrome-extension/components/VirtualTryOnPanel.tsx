@@ -7,16 +7,24 @@ import "../styles/virtual-try-on-panel.css"
 interface VirtualTryOnPanelProps {
   userData: UserData
   productImages: string[]
+  tryOnResultImages?: string[]
+  isLoading?: boolean
   onClose: () => void
   onImagesChange?: (images: string[]) => void
 }
 
-const VirtualTryOnPanel = ({ userData, productImages, onClose, onImagesChange }: VirtualTryOnPanelProps) => {
+const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], isLoading, onClose, onImagesChange }: VirtualTryOnPanelProps) => {
   const [images, setImages] = useState<string[]>(productImages)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {
     setImages(productImages)
   }, [productImages])
+
+  // Reset to first image when new results come in
+  useEffect(() => {
+    setCurrentImageIndex(0)
+  }, [tryOnResultImages])
 
   const handleRemoveImage = (indexToRemove: number) => {
     const newImages = images.filter((_, index) => index !== indexToRemove)
@@ -28,6 +36,23 @@ const VirtualTryOnPanel = ({ userData, productImages, onClose, onImagesChange }:
     preventDefaultAndStop(e)
     onClose()
   }
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? tryOnResultImages.length - 1 : prev - 1
+    )
+  }
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => 
+      prev === tryOnResultImages.length - 1 ? 0 : prev + 1
+    )
+  }
+
+  const hasMultipleResults = tryOnResultImages.length > 1
+  const currentResultImage = tryOnResultImages[currentImageIndex]
 
   return (
     <div
@@ -45,8 +70,68 @@ const VirtualTryOnPanel = ({ userData, productImages, onClose, onImagesChange }:
       <div className="virtual-try-on-panel-content">
         {/* Profile Photo Section */}
         <div className="virtual-try-on-profile-section">
-          <h3 className="virtual-try-on-section-title">Your Photo</h3>
-          {userData.photo ? (
+          <h3 className="virtual-try-on-section-title">
+            {tryOnResultImages.length > 0 ? "Try-On Result" : "Your Photo"}
+          </h3>
+          {isLoading ? (
+            <div className="virtual-try-on-profile-container">
+              <div className="virtual-try-on-spinner">
+                <div className="spinner"></div>
+                <p style={{ fontSize: "14px", color: "#666", marginTop: "16px", textAlign: "center" }}>
+                  Generating your virtual try-on...
+                </p>
+              </div>
+            </div>
+          ) : tryOnResultImages.length > 0 ? (
+            <div className="virtual-try-on-carousel">
+              {hasMultipleResults && (
+                <button 
+                  className="virtual-try-on-carousel-arrow virtual-try-on-carousel-prev"
+                  onClick={handlePrevImage}
+                  aria-label="Previous view"
+                >
+                  ‹
+                </button>
+              )}
+              
+              <div className="virtual-try-on-profile-container">
+                <img
+                  src={currentResultImage}
+                  alt={`Virtual Try-On Result - View ${currentImageIndex + 1}`}
+                  className="virtual-try-on-profile-image"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none"
+                  }}
+                />
+              </div>
+              
+              {hasMultipleResults && (
+                <button 
+                  className="virtual-try-on-carousel-arrow virtual-try-on-carousel-next"
+                  onClick={handleNextImage}
+                  aria-label="Next view"
+                >
+                  ›
+                </button>
+              )}
+              
+              {hasMultipleResults && (
+                <div className="virtual-try-on-carousel-dots">
+                  {tryOnResultImages.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`virtual-try-on-carousel-dot ${index === currentImageIndex ? 'active' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCurrentImageIndex(index)
+                      }}
+                      aria-label={`View ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : userData.photo ? (
             <div className="virtual-try-on-profile-container">
               <img
                 src={userData.photo}

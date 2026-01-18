@@ -92,7 +92,7 @@ def process_selfie(
     output_path: str,
     padding: int = 20,
     max_size: int | None = None
-) -> None:
+) -> str:
     """
     Main function to process a selfie.
     
@@ -101,6 +101,9 @@ def process_selfie(
         output_path: Path for output PNG (must be PNG for transparency)
         padding: Pixels of padding around the person
         max_size: Optional max dimension (width or height) to resize to
+    
+    Returns:
+        str: Actual output path used (may differ from input if extension changed to PNG)
     """
     print(f"Processing: {input_path}")
     
@@ -131,6 +134,8 @@ def process_selfie(
     
     img.save(output_path, "PNG")
     print(f"  Saved to: {output_path}")
+    
+    return str(output_path)
 
 
 def main():
