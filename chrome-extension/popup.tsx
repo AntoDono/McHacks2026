@@ -286,7 +286,7 @@ function IndexPopup() {
   return (
     <div className="popup-container">
       <h2 className="popup-welcome-header">
-        Welcome back! 👋
+        Welcome back!
       </h2>
       
       {/* Main content with photo on left, info on right */}
@@ -375,7 +375,7 @@ function IndexPopup() {
 
       <button
         onClick={handleReset}
-        className="popup-reset-button">
+        className="popup-reset-button btn-primary">
         Reset Data
       </button>
     </div>

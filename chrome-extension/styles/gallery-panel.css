@@ -8,8 +8,8 @@
   width: 400px !important;
   max-width: calc(90vw - 40px) !important;
   max-height: calc(100vh - 40px) !important;
-  background-color: white !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  background-color: var(--surface) !important;
+  box-shadow: var(--shadow-lg) !important;
   border-radius: 16px !important;
   display: flex !important;
   flex-direction: column !important;
@@ -36,7 +36,7 @@
   justify-content: space-between !important;
   align-items: center !important;
   padding: 20px !important;
-  border-bottom: 1px solid #e0e0e0 !important;
+  border-bottom: 1px solid var(--border-light) !important;
   box-sizing: border-box !important;
 }
 
@@ -45,7 +45,7 @@
   margin: 0 !important;
   font-size: 18px !important;
   font-weight: 600 !important;
-  color: #000 !important;
+  color: var(--text-primary) !important;
   display: block !important;
   font-family: var(--font-title) !important;
   -webkit-font-smoothing: antialiased !important;
@@ -57,7 +57,7 @@
   background: none !important;
   border: none !important;
   font-size: 28px !important;
-  color: #666 !important;
+  color: var(--text-light) !important;
   cursor: pointer !important;
   padding: 0 !important;
   width: 32px !important;
@@ -72,8 +72,8 @@
 }
 
 #plasmo-image-overlay-root .gallery-panel-close:hover {
-  background-color: #f0f0f0 !important;
-  color: #000 !important;
+  background-color: var(--neutral-light) !important;
+  color: var(--text-primary) !important;
 }
 
 #plasmo-image-overlay-root .gallery-panel-content {
@@ -88,7 +88,7 @@
 #plasmo-image-overlay-root .gallery-panel-count {
   all: initial !important;
   margin: 0 0 16px 0 !important;
-  color: #666 !important;
+  color: var(--text-light) !important;
   font-size: 14px !important;
   display: block !important;
   font-family: var(--font-text) !important;
@@ -109,7 +109,7 @@
   height: auto !important;
   border-radius: 8px !important;
   object-fit: cover !important;
-  border: 1px solid #e0e0e0 !important;
+  border: 1px solid var(--border-light) !important;
   cursor: pointer !important;
   transition: transform 0.2s ease !important;
   display: block !important;
@@ -118,7 +118,7 @@
 
 #plasmo-image-overlay-root .gallery-panel-image:hover {
   transform: scale(1.02) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 #plasmo-image-overlay-root .gallery-panel-empty {
@@ -130,7 +130,7 @@
   justify-content: center !important;
   padding: 40px 20px !important;
   text-align: center !important;
-  color: #666 !important;
+  color: var(--text-light) !important;
   box-sizing: border-box !important;
   font-family: var(--font-text) !important;
 }
@@ -145,7 +145,7 @@
 #plasmo-image-overlay-root .gallery-panel-hint {
   all: initial !important;
   font-size: 14px !important;
-  color: #999 !important;
+  color: var(--text-light) !important;
   margin-top: 12px !important;
   display: block !important;
   font-family: var(--font-text) !important;

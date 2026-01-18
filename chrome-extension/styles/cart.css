@@ -1,14 +1,15 @@
+@import './globals.css';
+
 .cart-panel {
   position: fixed;
   top: 20px;
   right: 20px;
   width: 320px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
   z-index: 2147483646;
   pointer-events: auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   overflow: hidden;
   transition: height 0.3s ease;
 }
@@ -21,10 +22,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: white;
-  color: black;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--surface);
+  color: var(--text-primary);
 }
 
 .cart-title-section {
@@ -40,12 +41,12 @@
 }
 
 .cart-count {
-  background: #f3f4f6;
+  background: var(--neutral-light);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
-  color: black;
+  color: var(--text-primary);
 }
 
 .cart-actions {
@@ -55,13 +56,13 @@
 
 .cart-minimize-btn,
 .cart-close-btn {
-  background: #f3f4f6;
+  background: var(--neutral-light);
   border: none;
-  color: black;
+  color: var(--text-primary);
   font-size: 20px;
   width: 32px;
   height: 32px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -71,7 +72,7 @@
 
 .cart-minimize-btn:hover,
 .cart-close-btn:hover {
-  background: #e5e7eb;
+  background: var(--border-light);
 }
 
 .cart-items {
@@ -87,8 +88,8 @@
 .cart-empty {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 40px 20px;
-  color: #6b7280;
+  padding: 40px var(--spacing-xl);
+  color: var(--text-light);
 }
 
 .cart-empty p {
@@ -97,21 +98,21 @@
 
 .cart-empty-hint {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--text-light);
 }
 
 .cart-item {
   position: relative;
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background: #f3f4f6;
+  background: var(--neutral-light);
   border: 2px solid transparent;
   transition: border-color 0.2s;
 }
 
 .cart-item:hover {
-  border-color: #667eea;
+  border-color: var(--primary);
 }
 
 .cart-item-image {
@@ -122,11 +123,11 @@
 
 .cart-item-remove {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  background: white;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  background: var(--surface);
   border: none;
-  color: black;
+  color: var(--text-primary);
   font-size: 20px;
   width: 24px;
   height: 24px;
@@ -140,17 +141,17 @@
 }
 
 .cart-item-remove:hover {
-  background: rgba(220, 38, 38, 0.9);
+  background: var(--error-text);
   transform: scale(1.1);
-  color: white;
+  color: var(--text-on-dark);
 }
 
 .cart-item-number {
   position: absolute;
   bottom: 4px;
   left: 4px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
+  background: var(--overlay-black-70);
+  color: var(--text-on-dark);
   font-size: 11px;
   font-weight: 600;
   padding: 2px 6px;
@@ -159,17 +160,16 @@
 
 .cart-footer {
   padding: 10px;
-  background: #f9fafb;
+  background: var(--neutral-light);
 }
 
 .cart-try-on-btn {
   width: 100%;
-  /* padding: 12px; */
   height: 35px;
-  background: white;
-  color: black;
+  background: var(--primary);
+  color: var(--surface);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -180,8 +180,9 @@
 }
 
 .cart-try-on-btn:hover:not(:disabled) {
+  background: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-primary-hover);
 }
 
 .cart-try-on-btn:disabled {
@@ -192,8 +193,8 @@
 .cart-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 2px solid var(--overlay-white-30);
+  border-top-color: var(--text-on-dark);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -210,14 +211,14 @@
 }
 
 .cart-items::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: var(--neutral-light);
 }
 
 .cart-items::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: var(--neutral-grey);
   border-radius: 3px;
 }
 
 .cart-items::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--text-light);
 }

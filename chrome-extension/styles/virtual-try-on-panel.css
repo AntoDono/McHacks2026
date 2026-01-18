@@ -16,8 +16,9 @@
   width: 450px !important;
   max-width: calc(90vw - 40px) !important;
   max-height: calc(100vh - 40px) !important;
-  background-color: white !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  background-color: var(--surface) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border: 1px solid var(--border-light) !important;
   border-radius: 16px !important;
   display: flex !important;
   flex-direction: column !important;
@@ -45,8 +46,8 @@
   justify-content: space-between !important;
   align-items: center !important;
   padding: 20px 24px !important;
-  border-bottom: 1px solid #e0e0e0 !important;
-  background-color: #f8f9fa !important;
+  border-bottom: 1px solid var(--border-light) !important;
+  background-color: var(--neutral-light) !important;
   box-sizing: border-box !important;
 }
 
@@ -55,7 +56,7 @@
   margin: 0 !important;
   font-size: 20px !important;
   font-weight: 600 !important;
-  color: #1a1a1a !important;
+  color: var(--text-primary) !important;
   display: block !important;
   font-family: var(--font-title) !important;
   -webkit-font-smoothing: antialiased !important;
@@ -67,7 +68,7 @@
   background: none !important;
   border: none !important;
   font-size: 28px !important;
-  color: #666 !important;
+  color: var(--text-light) !important;
   cursor: pointer !important;
   padding: 0 !important;
   width: 32px !important;
@@ -83,8 +84,8 @@
 }
 
 #plasmo-image-overlay-root .virtual-try-on-panel-close:hover {
-  background-color: #f0f0f0 !important;
-  color: #000 !important;
+  background-color: var(--neutral-light) !important;
+  color: var(--text-primary) !important;
 }
 
 /* Panel Content */
@@ -114,7 +115,7 @@
   all: initial !important;
   font-size: 16px !important;
   font-weight: 600 !important;
-  color: #1a1a1a !important;
+  color: var(--text-primary) !important;
   margin: 0 !important;
   display: block !important;
   font-family: var(--font-text) !important;
@@ -148,10 +149,10 @@
   all: initial !important;
   padding: 40px 20px !important;
   text-align: center !important;
-  color: #999 !important;
-  background-color: #f8f9fa !important;
+  color: var(--text-light) !important;
+  background-color: var(--neutral-light) !important;
   border-radius: 12px !important;
-  border: 2px dashed #e0e0e0 !important;
+  border: 2px dashed var(--border-light) !important;
   display: block !important;
   box-sizing: border-box !important;
   font-family: var(--font-text) !important;
@@ -173,8 +174,8 @@
   aspect-ratio: 1 !important;
   overflow: visible !important;
   border-radius: 8px !important;
-  border: 2px solid #e0e0e0 !important;
-  background-color: #f8f9fa !important;
+  border: 2px solid var(--border-light) !important;
+  background-color: var(--neutral-light) !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
   display: block !important;
   box-sizing: border-box !important;
@@ -194,7 +195,7 @@
 
 #plasmo-image-overlay-root .virtual-try-on-product-item:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: var(--shadow-md) !important;
   border-color: var(--primary) !important;
 }
 
@@ -213,8 +214,8 @@
   right: 8px !important;
   width: 24px !important;
   height: 24px !important;
-  background-color: rgba(0, 0, 0, 0.6) !important;
-  color: white !important;
+  background-color: var(--overlay-black-60) !important;
+  color: var(--text-on-dark) !important;
   border: none !important;
   border-radius: 50% !important;
   font-size: 16px !important;
@@ -226,13 +227,13 @@
   transition: all 0.2s ease !important;
   line-height: 1 !important;
   padding: 0 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: var(--shadow-sm) !important;
   box-sizing: border-box !important;
   font-family: var(--font-text) !important;
 }
 
 #plasmo-image-overlay-root .virtual-try-on-remove-button:hover {
-  background-color: rgba(0, 0, 0, 0.8) !important;
+  background-color: var(--overlay-black-80) !important;
   transform: scale(1.05) !important;
 }
 
@@ -244,10 +245,10 @@
   all: initial !important;
   padding: 40px 20px !important;
   text-align: center !important;
-  color: #999 !important;
-  background-color: #f8f9fa !important;
+  color: var(--text-light) !important;
+  background-color: var(--neutral-light) !important;
   border-radius: 12px !important;
-  border: 2px dashed #e0e0e0 !important;
+  border: 2px dashed var(--border-light) !important;
   display: block !important;
   box-sizing: border-box !important;
   font-family: var(--font-text) !important;
@@ -259,16 +260,16 @@
 }
 
 #plasmo-image-overlay-root .virtual-try-on-panel-content::-webkit-scrollbar-track {
-  background: #f1f1f1 !important;
+  background: var(--neutral-light) !important;
 }
 
 #plasmo-image-overlay-root .virtual-try-on-panel-content::-webkit-scrollbar-thumb {
-  background: #c0c0c0 !important;
-  border-radius: 4px !important;
+  background: var(--neutral-grey) !important;
+  border-radius: var(--radius-sm) !important;
 }
 
 #plasmo-image-overlay-root .virtual-try-on-panel-content::-webkit-scrollbar-thumb:hover {
-  background: #a0a0a0 !important;
+  background: var(--text-light) !important;
 }
 
 /* Spinner styles */
@@ -284,7 +285,7 @@
 
 #plasmo-image-overlay-root .virtual-try-on-spinner p {
   font-size: 14px !important;
-  color: #666 !important;
+  color: var(--text-light) !important;
   margin-top: 16px !important;
   text-align: center !important;
   font-family: var(--font-text) !important;
@@ -295,7 +296,7 @@
   height: 50px !important;
   border-style: solid !important;
   border-width: 4px !important;
-  border-color: #f3f3f3 #f3f3f3 #f3f3f3 #000 !important;
+  border-color: var(--neutral-light) var(--neutral-light) var(--neutral-light) var(--primary) !important;
   border-radius: 50% !important;
   animation: plasmo-spin 1s linear infinite !important;
   display: block !important;
@@ -330,8 +331,8 @@
   transform: translateY(-50%) !important;
   width: 40px !important;
   height: 40px !important;
-  background-color: rgba(0, 0, 0, 0.6) !important;
-  color: white !important;
+  background-color: var(--overlay-black-60) !important;
+  color: var(--text-on-dark) !important;
   border: none !important;
   border-radius: 50% !important;
   font-size: 24px !important;
@@ -347,7 +348,7 @@
 }
 
 #plasmo-image-overlay-root .virtual-try-on-carousel-arrow:hover {
-  background-color: rgba(0, 0, 0, 0.8) !important;
+  background-color: var(--overlay-black-80) !important;
   transform: translateY(-50%) scale(1.1) !important;
 }
 
@@ -373,7 +374,7 @@
   width: 10px !important;
   height: 10px !important;
   border-radius: 50% !important;
-  background-color: #ddd !important;
+  background-color: var(--border-light) !important;
   border: none !important;
   cursor: pointer !important;
   padding: 0 !important;
@@ -383,11 +384,11 @@
 }
 
 #plasmo-image-overlay-root .virtual-try-on-carousel-dot:hover {
-  background-color: #999 !important;
+  background-color: var(--neutral-grey) !important;
 }
 
 #plasmo-image-overlay-root .virtual-try-on-carousel-dot.active {
-  background-color: #000 !important;
+  background-color: var(--primary) !important;
   transform: scale(1.2) !important;
 }
 
@@ -396,8 +397,8 @@
   all: initial !important;
   width: 100% !important;
   padding: 14px 20px !important;
-  background-color: #000 !important;
-  color: white !important;
+  background-color: var(--primary) !important;
+  color: var(--surface) !important;
   border: none !important;
   border-radius: 8px !important;
   font-size: 16px !important;
@@ -411,9 +412,9 @@
 }
 
 #plasmo-image-overlay-root .virtual-try-on-start-button:hover {
-  background-color: #333 !important;
+  background-color: var(--primary-dark) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: var(--shadow-primary) !important;
 }
 
 #plasmo-image-overlay-root .virtual-try-on-start-button:active {
