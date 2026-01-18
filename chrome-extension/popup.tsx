@@ -66,55 +66,92 @@ function IndexPopup() {
   return (
     <div
       style={{
-        padding: 24,
-        minWidth: 350,
-        backgroundColor: "white"
+        padding: 20,
+        width: 380,
+        backgroundColor: "#f8f9fa"
       }}>
-      <h2 style={{ color: "#000", marginTop: 0 }}>
-        Welcome back, {userData.fname}! 👋
+      <h2 style={{ color: "#1a1a1a", marginTop: 0, marginBottom: 16, fontSize: "22px", fontWeight: "600" }}>
+        Welcome back! 👋
       </h2>
-      {userData.photo && (
-        <img
-          src={userData.photo}
-          alt="Profile"
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: "50%",
-            objectFit: "cover",
-            border: "3px solid var(--primary)",
-            marginBottom: 16
-          }}
-        />
-      )}
-      <div style={{ color: "#333", marginBottom: 20 }}>
-        <p>
-          <strong>Email:</strong> {userData.email}
-        </p>
-        <p>
-          <strong>Name:</strong> {userData.fname} {userData.lname}
-        </p>
+      
+      {/* Main content with photo on left, info on right */}
+      <div
+        style={{
+          display: "flex",
+          gap: 16,
+          marginBottom: 20,
+          backgroundColor: "white",
+          padding: 16,
+          borderRadius: "12px",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)"
+        }}>
+        {/* Left: Profile Photo */}
+        {userData.photo && (
+          <div style={{ flexShrink: 0 }}>
+            <img
+              src={userData.photo}
+              alt="Profile"
+              style={{
+                width: 90,
+                height: 90,
+                borderRadius: "10px",
+                objectFit: "contain",
+                border: "2px solid var(--primary)",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                display: "block",
+                backgroundColor: "#f5f5f5"
+              }}
+            />
+          </div>
+        )}
+        
+        {/* Right: User Info */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <h3 style={{ 
+            color: "#1a1a1a", 
+            margin: "0 0 12px 0", 
+            fontSize: "20px",
+            fontWeight: "600"
+          }}>
+            {userData.fname} {userData.lname}
+          </h3>
+          <div style={{ color: "#666", fontSize: "14px", lineHeight: "1.6" }}>
+            <div style={{ 
+              display: "flex", 
+              alignItems: "center", 
+              marginBottom: 6,
+              gap: 8
+            }}>
+              <span style={{ fontWeight: "500", color: "#888", minWidth: 50 }}>Email:</span>
+              <span style={{ color: "#333" }}>{userData.email}</span>
+            </div>
+          </div>
+        </div>
       </div>
+      
       <button
         onClick={handleReset}
         style={{
-          padding: "10px 20px",
-          backgroundColor: "#f5f5f5",
+          padding: "12px 20px",
+          backgroundColor: "white",
           color: "#666",
-          border: "1px solid #ddd",
-          borderRadius: "8px",
+          border: "2px solid #e0e0e0",
+          borderRadius: "10px",
           cursor: "pointer",
           fontSize: "14px",
+          fontWeight: "500",
           width: "100%",
           transition: "all 0.2s ease"
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = "#eee"
-          e.currentTarget.style.borderColor = "#ccc"
+          e.currentTarget.style.backgroundColor = "#fff5f5"
+          e.currentTarget.style.borderColor = "#ffb3b3"
+          e.currentTarget.style.color = "#d32f2f"
         }}
         onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = "#f5f5f5"
-          e.currentTarget.style.borderColor = "#ddd"
+          e.currentTarget.style.backgroundColor = "white"
+          e.currentTarget.style.borderColor = "#e0e0e0"
+          e.currentTarget.style.color = "#666"
         }}>
         Reset Data
       </button>

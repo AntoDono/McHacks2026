@@ -1,5 +1,9 @@
 import type { PlasmoCSConfig, PlasmoGetRootContainer } from "plasmo"
 import { useEffect, useState } from "react"
+import { getUserData } from "~utils/storage"
+import type { UserData } from "~types/user"
+import UserInfo from "~components/UserInfo"
+import Setup from "~components/Setup"
 
 import "./styles/content.css"
 
@@ -18,44 +22,65 @@ export const getRootContainer: PlasmoGetRootContainer = () => {
 }
 
 const ImageClickOverlay = () => {
-  const [currentImage, setCurrentImage] = useState<string | null>(null)
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [showUserInfo, setShowUserInfo] = useState(true)
+  const [showSetup, setShowSetup] = useState(true)
 
+  // Load user data on mount
   useEffect(() => {
-    const handleImageClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      
-      // Check if the clicked element is an image
-      if (target.tagName === "IMG") {
-        e.preventDefault()
-        e.stopPropagation()
-        
-        const img = target as HTMLImageElement
-        setCurrentImage(img.src)
-        console.log("Image clicked:", img.src)
+    const loadUserData = async () => {
+      try {
+        const data = await getUserData()
+        setUserData(data)
+      } catch (error) {
+        console.error("Error loading user data:", error)
+      } finally {
+        setIsLoading(false)
       }
     }
-
-    // Add click listener to the document
-    document.addEventListener("click", handleImageClick, true)
-
-    return () => {
-      document.removeEventListener("click", handleImageClick, true)
-    }
+    loadUserData()
   }, [])
 
-  const closePreview = () => {
-    setCurrentImage(null)
+
+  const handleSetupComplete = async () => {
+    // Reload user data after setup
+    try {
+      const data = await getUserData()
+      setUserData(data)
+    } catch (error) {
+      console.error("Error loading user data:", error)
+    }
   }
 
-  // Always render container, but make it hidden when no image
+  const handleCloseUserInfo = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    setShowUserInfo(false)
+  }
+
+  const handleCloseSetup = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    setShowSetup(false)
+  }
+
+  if (isLoading) {
+    return null
+  }
+
   return (
     <>
-      {currentImage && (
-        <div className="image-preview-container" onClick={closePreview}>
-          <img src={currentImage} alt="Preview" className="image-preview-img" />
-          <div className="image-preview-text">Click to close</div>
-        </div>
-      )}
+      {/* Right side: UserInfo if setup, Setup if not */}
+      {userData?.isSetup && showUserInfo ? (
+        <UserInfo userData={userData} onClose={handleCloseUserInfo} />
+      ) : !userData?.isSetup && showSetup ? (
+        <Setup onSetupComplete={handleSetupComplete} onClose={handleCloseSetup} />
+      ) : null}
     </>
   )
 }

@@ -1,0 +1,6 @@
+rembg[cpu]
+pillow
+numpy
+flask
+flask-cors
+werkzeug

@@ -6,16 +6,21 @@ import "../styles/setup.css"
 
 interface SetupProps {
   onSetupComplete: () => void
+  onClose?: () => void
 }
 
-const Setup = ({ onSetupComplete }: SetupProps) => {
+const Setup = ({ onSetupComplete, onClose }: SetupProps) => {
   const [fname, setFname] = useState("")
   const [lname, setLname] = useState("")
   const [email, setEmail] = useState("")
   const [photo, setPhoto] = useState<string>("")
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string>("")
+  const [isProcessing, setIsProcessing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Backend API URL - update this to match your Flask server
+  const API_URL = process.env.PLASMO_PUBLIC_API_URL || "http://localhost:8080"
 
   // Convert image file to base64
   const convertToBase64 = (file: File): Promise<string> => {
@@ -25,6 +30,25 @@ const Setup = ({ onSetupComplete }: SetupProps) => {
       reader.onerror = (error) => reject(error)
       reader.readAsDataURL(file)
     })
+  }
+
+  // Process image through backend API
+  const processImageWithBackend = async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append("image", file)
+
+    const response = await fetch(`${API_URL}/process-image`, {
+      method: "POST",
+      body: formData
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || "Failed to process image")
+    }
+
+    const data = await response.json()
+    return data.image // Returns base64 image
   }
 
   // Handle file selection
@@ -41,14 +65,27 @@ const Setup = ({ onSetupComplete }: SetupProps) => {
       return
     }
 
+    setIsProcessing(true)
+    setError("")
+
     try {
-      const base64 = await convertToBase64(file)
-      setPhoto(base64)
-      setError("")
-      console.log("Image converted to base64, size:", base64.length)
+      // Process image through backend
+      const processedImage = await processImageWithBackend(file)
+      setPhoto(processedImage)
+      console.log("Image processed successfully")
     } catch (err) {
-      setError("Failed to process image")
-      console.error("Error converting image:", err)
+      const errorMessage = err instanceof Error ? err.message : "Failed to process image"
+      setError(errorMessage)
+      console.log("Error processing image:", err)
+      
+      // Fallback: use original image if backend fails
+      try {
+        const base64 = await convertToBase64(file)
+        setPhoto(base64)
+      } catch (fallbackErr) {
+      }
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -123,8 +160,21 @@ const Setup = ({ onSetupComplete }: SetupProps) => {
     }
   }
 
+  const handleCloseClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onClose) {
+      onClose()
+    }
+  }
+
   return (
     <div className="setup-container">
+      {onClose && (
+        <button className="setup-close" onClick={handleCloseClick}>
+          ×
+        </button>
+      )}
       <h1 className="setup-title">Welcome!</h1>
       <p className="setup-subtitle">Let's get you set up</p>
 
@@ -135,14 +185,26 @@ const Setup = ({ onSetupComplete }: SetupProps) => {
           <div
             className={`dropzone ${isDragging ? "dropzone-active" : ""} ${
               photo ? "dropzone-has-image" : ""
-            }`}
+            } ${isProcessing ? "dropzone-processing" : ""}`}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}>
-            {photo ? (
-              <img src={photo} alt="Your photo" className="preview-image" />
+            onClick={() => !isProcessing && !photo && fileInputRef.current?.click()}>
+            {isProcessing ? (
+              <div className="dropzone-content">
+                <div className="dropzone-icon">⏳</div>
+                <p className="dropzone-text">Processing image...</p>
+              </div>
+            ) : photo ? (
+              <img 
+                src={photo} 
+                alt="Your photo" 
+                className="preview-image"
+                onClick={(e) => e.stopPropagation()}
+                onContextMenu={(e) => e.preventDefault()}
+                style={{ pointerEvents: "none" }}
+              />
             ) : (
               <div className="dropzone-content">
                 <div className="dropzone-icon">📸</div>
