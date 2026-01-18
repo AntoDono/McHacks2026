@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import Setup from "~components/Setup"
-import { getUserData, clearUserData } from "~utils/storage"
+import { getUserData, clearUserData, getStoredGalleryImages, GALLERY_IMAGES_KEY } from "~utils/storage"
 import type { UserData } from "~types/user"
 
 import "./styles/globals.css"
@@ -8,11 +8,64 @@ import "./styles/globals.css"
 function IndexPopup() {
   const [isLoading, setIsLoading] = useState(true)
   const [userData, setUserData] = useState<UserData | null>(null)
+  const [galleryImages, setGalleryImages] = useState<string[]>([])
 
   // Check if user is setup on load
   useEffect(() => {
     loadUserData()
+    loadGalleryImages()
+    
+    // Listen for storage changes to update gallery images
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string
+    ) => {
+      try {
+        if (areaName === 'local' && changes[GALLERY_IMAGES_KEY]) {
+          console.log("Storage changed, reloading gallery images")
+          loadGalleryImages()
+        }
+      } catch (error) {
+        console.error("Error handling storage change:", error)
+      }
+    }
+    
+    // Listen for messages from content script
+    const handleMessage = (
+      message: { type: string; images?: string[] },
+      sender: chrome.runtime.MessageSender,
+      sendResponse: (response?: any) => void
+    ) => {
+      try {
+        if (message.type === 'GALLERY_IMAGES_UPDATED' && message.images) {
+          setGalleryImages(message.images)
+          sendResponse({ success: true })
+        }
+      } catch (error) {
+        console.error("Error handling message:", error)
+        sendResponse({ success: false, error: String(error) })
+      }
+      return true // Keep message channel open for async response
+    }
+    
+    chrome.storage.onChanged.addListener(handleStorageChange)
+    chrome.runtime.onMessage.addListener(handleMessage)
+    
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange)
+      chrome.runtime.onMessage.removeListener(handleMessage)
+    }
   }, [])
+
+  const loadGalleryImages = async () => {
+    try {
+      const images = await getStoredGalleryImages()
+      console.log("Loaded gallery images:", images)
+      setGalleryImages(images)
+    } catch (error) {
+      console.error("Error loading gallery images:", error)
+    }
+  }
 
   const loadUserData = async () => {
     try {
@@ -95,6 +148,43 @@ function IndexPopup() {
           <strong>Name:</strong> {userData.fname} {userData.lname}
         </p>
       </div>
+
+      {galleryImages.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <h3 style={{ color: "#000", marginBottom: 12, fontSize: "16px" }}>
+            Product Gallery ({galleryImages.length} images)
+          </h3>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "8px",
+              maxHeight: "400px",
+              overflowY: "auto"
+            }}
+          >
+            {galleryImages.map((src, index) => (
+              <img
+                key={index}
+                src={src}
+                alt={`Product image ${index + 1}`}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: "4px",
+                  objectFit: "cover",
+                  cursor: "pointer",
+                  border: "1px solid #ddd"
+                }}
+                onError={(e) => {
+                  e.currentTarget.style.display = "none"
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <button
         onClick={handleReset}
         style={{
