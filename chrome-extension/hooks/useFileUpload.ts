@@ -114,7 +114,7 @@ export const useFileUpload = () => {
   }
 
   const openFileDialog = () => {
-    if (!isProcessing && !photo) {
+    if (!isProcessing) {
       fileInputRef.current?.click()
     }
   }

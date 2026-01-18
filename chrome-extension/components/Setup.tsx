@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { FaCamera } from "react-icons/fa"
 import { saveUserData } from "~utils/storage"
 import { validateForm } from "~utils/fileValidation"
 import { useFileUpload } from "~hooks/useFileUpload"
@@ -81,13 +82,13 @@ const Setup = ({ onSetupComplete, onClose }: SetupProps) => {
           ×
         </button>
       )}
-      <h1 className="setup-title">Welcome!</h1>
-      <p className="setup-subtitle">Let's get you set up</p>
+      <h1 className="setup-title">Setup</h1>
+      <p className="setup-subtitle">Upload your photo and enter your information</p>
 
       <form onSubmit={handleSubmit} className="setup-form">
         {/* Photo Upload Section */}
         <div className="setup-section">
-          <h2 className="section-title">Upload a picture of yourself!</h2>
+          <h2 className="section-title">Upload your photo</h2>
           <div
             className={`dropzone ${isDragging ? "dropzone-active" : ""} ${
               photo ? "dropzone-has-image" : ""
@@ -100,7 +101,7 @@ const Setup = ({ onSetupComplete, onClose }: SetupProps) => {
           >
             {isProcessing ? (
               <div className="dropzone-content">
-                <div className="dropzone-icon">⏳</div>
+                <div className="dropzone-spinner"></div>
                 <p className="dropzone-text">Processing image...</p>
               </div>
             ) : photo ? (
@@ -117,12 +118,11 @@ const Setup = ({ onSetupComplete, onClose }: SetupProps) => {
               </div>
             ) : (
               <div className="dropzone-content">
-                <div className="dropzone-icon">📸</div>
-                <p className="dropzone-text">
-                  Drag & drop your photo here
-                  <br />
-                  or click to browse
-                </p>
+                <div className="dropzone-icon-wrapper">
+                  <FaCamera className="dropzone-icon" />
+                </div>
+                <p className="dropzone-text">Click to upload</p>
+                <p className="dropzone-subtext">PNG, JPG up to 10MB</p>
               </div>
             )}
           </div>

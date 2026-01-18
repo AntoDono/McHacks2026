@@ -388,3 +388,32 @@
   background-color: #000 !important;
   transform: scale(1.2) !important;
 }
+
+/* Start Try-On Button */
+#plasmo-image-overlay-root .virtual-try-on-start-button {
+  all: initial !important;
+  width: 100% !important;
+  padding: 14px 20px !important;
+  background-color: #000 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: block !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-start-button:hover {
+  background-color: #333 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-start-button:active {
+  transform: translateY(0) !important;
+}
