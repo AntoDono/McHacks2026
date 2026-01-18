@@ -132,6 +132,19 @@ export const clearGalleryImages = async (): Promise<void> => {
 }
 
 /**
+ * Cart item with metadata
+ */
+export interface CartItem {
+  imageUrl: string
+  base64?: string | null  // Base64 encoded image data
+  url?: string
+  title?: string
+  price?: string
+  sku?: string
+  brand?: string
+}
+
+/**
  * Storage key for cart items
  */
 export const CART_ITEMS_KEY = 'cart_items'
@@ -139,7 +152,7 @@ export const CART_ITEMS_KEY = 'cart_items'
 /**
  * Save cart items to Chrome local storage
  */
-export const saveCartItems = async (items: string[]): Promise<void> => {
+export const saveCartItems = async (items: CartItem[]): Promise<void> => {
   try {
     await storageSet({ [CART_ITEMS_KEY]: items })
     console.log(`Cart saved: ${items.length} items`)
@@ -152,10 +165,32 @@ export const saveCartItems = async (items: string[]): Promise<void> => {
 /**
  * Get cart items from Chrome local storage
  */
-export const getCartItems = async (): Promise<string[]> => {
+export const getCartItems = async (): Promise<CartItem[]> => {
   try {
-    const result = await storageGet<string[]>([CART_ITEMS_KEY])
-    const items = result[CART_ITEMS_KEY] as string[] | undefined
+    const result = await storageGet<CartItem[]>([CART_ITEMS_KEY])
+    const items = result[CART_ITEMS_KEY] as CartItem[] | undefined
+    
+    // Handle legacy format (string arrays) by converting to new format
+    if (items && items.length > 0 && typeof items[0] === 'string') {
+      const legacyItems = items as unknown as string[]
+      const convertedItems: CartItem[] = legacyItems.map(url => ({ 
+        imageUrl: url,
+        base64: null
+      }))
+      await saveCartItems(convertedItems)
+      return convertedItems
+    }
+    
+    // Handle old format without base64 field
+    if (items && items.length > 0 && !items[0].hasOwnProperty('base64')) {
+      const oldItems = items.map(item => ({
+        ...item,
+        base64: null
+      }))
+      await saveCartItems(oldItems)
+      return oldItems
+    }
+    
     return items || []
   } catch (error) {
     console.error("Error retrieving cart items:", error)
@@ -166,11 +201,11 @@ export const getCartItems = async (): Promise<string[]> => {
 /**
  * Add item to cart
  */
-export const addToCart = async (imageUrl: string): Promise<string[]> => {
+export const addToCart = async (item: CartItem): Promise<CartItem[]> => {
   const currentItems = await getCartItems()
-  // Avoid duplicates
-  if (!currentItems.includes(imageUrl)) {
-    const updatedItems = [...currentItems, imageUrl]
+  // Avoid duplicates based on image URL
+  if (!currentItems.some(i => i.imageUrl === item.imageUrl)) {
+    const updatedItems = [...currentItems, item]
     await saveCartItems(updatedItems)
     return updatedItems
   }
@@ -180,7 +215,7 @@ export const addToCart = async (imageUrl: string): Promise<string[]> => {
 /**
  * Remove item from cart by index
  */
-export const removeFromCart = async (index: number): Promise<string[]> => {
+export const removeFromCart = async (index: number): Promise<CartItem[]> => {
   const currentItems = await getCartItems()
   const updatedItems = currentItems.filter((_, i) => i !== index)
   await saveCartItems(updatedItems)

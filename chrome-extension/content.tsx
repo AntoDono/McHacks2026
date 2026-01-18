@@ -2,7 +2,7 @@ import type { PlasmoCSConfig, PlasmoGetRootContainer } from "plasmo"
 import { useEffect, useState } from "react"
 
 import { getGalleryImages } from "~utils/gallery-detection"
-import { getUserData, getCartItems, addToCart, removeFromCart, saveCartItems } from "~utils/storage"
+import { getUserData, getCartItems, addToCart, removeFromCart, saveCartItems, type CartItem } from "~utils/storage"
 import type { UserData } from "~types/user"
 import VirtualTryOnPanel from "~components/VirtualTryOnPanel"
 import TryOnButton from "~components/TryOnButton"
@@ -10,6 +10,7 @@ import Setup from "~components/Setup"
 import Cart from "~components/Cart"
 import { useImageHover } from "~hooks/useImageHover"
 import { useButtonPosition } from "~hooks/useButtonPosition"
+import { extractProductMetadata } from "~utils/product-detection/attributes"
 
 import "./styles/content.css"
 import "./styles/cart.css"
@@ -35,7 +36,7 @@ const ContentScript = () => {
   const [isHoveringButton, setIsHoveringButton] = useState(false)
   const [showVirtualTryOnPanel, setShowVirtualTryOnPanel] = useState(false)
   const [showCart, setShowCart] = useState(false)
-  const [cartItems, setCartItems] = useState<string[]>([])
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [userData, setUserData] = useState<UserData | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
   const [tryOnResultImages, setTryOnResultImages] = useState<string[]>([])
@@ -84,13 +85,46 @@ const ContentScript = () => {
       console.log("Found gallery images:", galleryImages.length, galleryImages)
 
       if (galleryImages.length > 0) {
-        // Add all gallery images to cart
+        // Extract product metadata once for the current page
+        const baseMetadata = extractProductMetadata(galleryImages[0])
+        
+        // Add all gallery images to cart with metadata AND base64
         let updatedCart = [...cartItems]
         let addedCount = 0
         
         for (const imageUrl of galleryImages) {
-          if (!updatedCart.includes(imageUrl)) {
-            updatedCart.push(imageUrl)
+          if (!updatedCart.some(item => item.imageUrl === imageUrl)) {
+            console.log(`Fetching and encoding image: ${imageUrl}`)
+            
+            // Fetch and convert to base64 immediately (while we have access)
+            let base64Data: string | null = null
+            try {
+              const response = await fetch(imageUrl)
+              const blob = await response.blob()
+              
+              // Convert to base64
+              const reader = new FileReader()
+              base64Data = await new Promise<string>((resolve, reject) => {
+                reader.onloadend = () => resolve(reader.result as string)
+                reader.onerror = reject
+                reader.readAsDataURL(blob)
+              })
+              console.log(`✓ Encoded image to base64 (${Math.round(base64Data.length / 1024)}KB)`)
+            } catch (error) {
+              console.error(`Failed to fetch/encode image:`, error)
+              // Continue without base64, URL will be fallback
+            }
+            
+            const cartItem: CartItem = {
+              imageUrl,
+              base64: base64Data,
+              url: baseMetadata.url,
+              title: baseMetadata.title,
+              price: baseMetadata.price,
+              sku: baseMetadata.sku,
+              brand: baseMetadata.brand
+            }
+            updatedCart.push(cartItem)
             addedCount++
           }
         }
@@ -99,7 +133,7 @@ const ContentScript = () => {
           await saveCartItems(updatedCart)
           setCartItems(updatedCart)
           setShowCart(true)
-          console.log(`Added ${addedCount} item(s) to cart. Total: ${updatedCart.length}`)
+          console.log(`Added ${addedCount} item(s) to cart with metadata and base64. Total: ${updatedCart.length}`)
           
           // Update badge
           try {
@@ -178,19 +212,40 @@ const ContentScript = () => {
       const formData = new FormData()
       formData.append("person", photoFile)
       
-      // Fetch and append all cart items
+      // Prepare garment data (already has URL + base64 from cart)
+      const garmentsData = []
+      const garmentsMetadata = []
+      
+      // Collect all garment data from cart
       for (let i = 0; i < cartItems.length; i++) {
-        const productImageUrl = cartItems[i]
-        console.log(`Processing cart item ${i + 1}/${cartItems.length}:`, productImageUrl)
+        const cartItem = cartItems[i]
+        console.log(`Sending cart item ${i + 1}/${cartItems.length}:`, {
+          url: cartItem.imageUrl,
+          hasBase64: !!cartItem.base64,
+          base64Size: cartItem.base64 ? `${Math.round(cartItem.base64.length / 1024)}KB` : 'N/A'
+        })
         
-        // Fetch product image and convert to File
-        const productResponse = await fetch(productImageUrl)
-        const productBlob = await productResponse.blob()
-        const productFile = new File([productBlob], `garment_${i}.jpg`, { type: productBlob.type || "image/jpeg" })
+        // Use stored base64 and URL
+        garmentsData.push({
+          url: cartItem.imageUrl,
+          base64: cartItem.base64 || null
+        })
         
-        // Append each garment with the same key name (backend will collect them all)
-        formData.append("garment", productFile)
+        // Add metadata for this garment
+        garmentsMetadata.push({
+          sku: cartItem.sku,
+          url: cartItem.url,
+          title: cartItem.title,
+          price: cartItem.price,
+          brand: cartItem.brand
+        })
       }
+      
+      // Send garment data (URL + base64) as JSON
+      formData.append("garments_data", JSON.stringify(garmentsData))
+      
+      // Add metadata as JSON string
+      formData.append("garments_metadata", JSON.stringify(garmentsMetadata))
 
       // Call try-on API
       console.log("Calling try-on API:", `${API_URL}/try-on`)
@@ -287,7 +342,7 @@ const ContentScript = () => {
           ) : (
             <VirtualTryOnPanel
               userData={userData}
-              productImages={cartItems}
+              productImages={cartItems.map(item => item.imageUrl)}
               tryOnResultImages={tryOnResultImages}
               isLoading={isLoadingTryOn}
               onStartVirtualTryOn={handleTryItOn}
@@ -296,7 +351,15 @@ const ContentScript = () => {
                 setTryOnResultImages([])
                 setIsLoadingTryOn(false)
               }}
-              onImagesChange={(images) => setCartItems(images)}
+              onImagesChange={(images) => {
+                // Update cart items, preserving metadata and base64 for images that remain
+                const updatedCart = images.map(imageUrl => {
+                  const existingItem = cartItems.find(item => item.imageUrl === imageUrl)
+                  return existingItem || { imageUrl, base64: null }
+                })
+                setCartItems(updatedCart)
+                saveCartItems(updatedCart)
+              }}
             />
           )}
         </>

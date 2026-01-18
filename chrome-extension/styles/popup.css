@@ -5,9 +5,10 @@
   padding: 20px;
   width: 400px;
   background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
-  min-height: 500px;
-  max-height: 600px;
-  overflow-y: auto;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
 }
 
 .popup-container::-webkit-scrollbar {
@@ -40,6 +41,7 @@
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  flex-shrink: 0;
 }
 
 /* Main Content Card */
@@ -53,6 +55,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.8);
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 .popup-main-card:hover {
@@ -115,7 +118,10 @@
 
 /* Gallery Section */
 .popup-gallery-section {
-  margin-bottom: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .popup-gallery-header-row {
@@ -156,7 +162,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  max-height: 400px;
+  flex: 1;
   overflow-y: auto;
   background-color: white;
   padding: 12px;
@@ -189,6 +195,7 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
   background-color: #f9f9f9;
+  height: 200px; /* Fixed height to prevent squeezing */
 }
 
 .popup-gallery-item:hover {
@@ -271,6 +278,26 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.popup-detail-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.popup-detail-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.popup-detail-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.popup-detail-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
 }
 
 .popup-back-button {
@@ -394,10 +421,159 @@
   top: 8px;
   right: 8px;
   background: linear-gradient(135deg, var(--primary), #ff6b9d);
-  color: white;
+  color: black;
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Garment Detail Modal */
+.popup-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.popup-modal-content {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.2s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popup-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid #e8e8e8;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+
+.popup-modal-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), #ff6b9d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.popup-modal-close {
+  background: #f5f5f5;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.popup-modal-close:hover {
+  background: #e8e8e8;
+  color: #333;
+  transform: rotate(90deg);
+}
+
+.popup-modal-body {
+  padding: 20px;
+}
+
+.popup-modal-image {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #f9f9f9;
+  margin-bottom: 20px;
+  border: 1px solid #e8e8e8;
+}
+
+.popup-modal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.popup-modal-detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.popup-modal-detail-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.popup-modal-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.popup-modal-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
+  word-wrap: break-word;
+}
+
+.popup-modal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--primary), #ff6b9d);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 157, 0.3);
+}
+
+.popup-modal-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 107, 157, 0.4);
 }

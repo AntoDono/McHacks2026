@@ -41,6 +41,7 @@ function IndexPopup() {
   const [loadingSessions, setLoadingSessions] = useState(false)
   const [selectedSession, setSelectedSession] = useState<SessionDetail | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [selectedGarment, setSelectedGarment] = useState<SessionDetail['garments'][0] | null>(null)
 
   // Check if user is setup on load
   useEffect(() => {
@@ -99,6 +100,14 @@ function IndexPopup() {
     setSelectedSession(null)
   }
 
+  const handleGarmentClick = (garment: SessionDetail['garments'][0]) => {
+    setSelectedGarment(garment)
+  }
+
+  const handleCloseGarmentModal = () => {
+    setSelectedGarment(null)
+  }
+
   const handleSetupComplete = () => {
     // Reload user data after setup
     loadUserData()
@@ -147,57 +156,127 @@ function IndexPopup() {
           <h2 className="popup-detail-title">Fit Details</h2>
         </div>
 
-        {loadingDetail ? (
-          <div className="popup-gallery-loading">
-            <p>Loading details...</p>
-          </div>
-        ) : (
-          <>
-            {/* Garments Used */}
-            <div className="popup-detail-section">
-              <h3 className="popup-detail-section-title">
-                Garments Used ({selectedSession.garments.length})
-              </h3>
-              <div className="popup-garments-grid">
-                {selectedSession.garments.map((garment, idx) => (
-                  <div key={idx} className="popup-garment-card">
-                    <img
-                      src={garment.image}
-                      alt={garment.title || `Garment ${idx + 1}`}
-                      className="popup-garment-image"
-                    />
-                    {garment.title && (
-                      <div className="popup-garment-title">{garment.title}</div>
-                    )}
-                    {garment.price && (
-                      <div className="popup-garment-price">{garment.price}</div>
-                    )}
-                  </div>
-                ))}
-              </div>
+        <div className="popup-detail-content">
+          {loadingDetail ? (
+            <div className="popup-gallery-loading">
+              <p>Loading details...</p>
             </div>
+          ) : (
+            <>
+              {/* Garments Used */}
+              <div className="popup-detail-section">
+                <h3 className="popup-detail-section-title">
+                  Garments Used ({selectedSession.garments.length})
+                </h3>
+                <div className="popup-garments-grid">
+                  {selectedSession.garments.map((garment, idx) => (
+                    <div 
+                      key={idx} 
+                      className="popup-garment-card"
+                      onClick={() => handleGarmentClick(garment)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <img
+                        src={garment.image}
+                        alt={garment.title || `Garment ${idx + 1}`}
+                        className="popup-garment-image"
+                      />
+                      {garment.title && (
+                        <div className="popup-garment-title">{garment.title}</div>
+                      )}
+                      {garment.price && (
+                        <div className="popup-garment-price">{garment.price}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-            {/* Generated Fits */}
-            <div className="popup-detail-section">
-              <h3 className="popup-detail-section-title">
-                Generated Fits ({selectedSession.generated_images.length})
-              </h3>
-              <div className="popup-fits-grid">
-                {selectedSession.generated_images.map((fit, idx) => (
-                  <div key={idx} className="popup-fit-card">
-                    <img
-                      src={fit.image}
-                      alt={`Fit ${idx + 1}`}
-                      className="popup-fit-image"
-                    />
-                    {fit.is_main && (
-                      <span className="popup-fit-main-badge">Main</span>
-                    )}
-                  </div>
-                ))}
+              {/* Generated Fits */}
+              <div className="popup-detail-section">
+                <h3 className="popup-detail-section-title">
+                  Generated Fits ({selectedSession.generated_images.length})
+                </h3>
+                <div className="popup-fits-grid">
+                  {selectedSession.generated_images.map((fit, idx) => (
+                    <div key={idx} className="popup-fit-card">
+                      <img
+                        src={fit.image}
+                        alt={`Fit ${idx + 1}`}
+                        className="popup-fit-image"
+                      />
+                      {fit.is_main && (
+                        <span className="popup-fit-main-badge">Main</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Garment Detail Modal */}
+        {selectedGarment && (
+          <div className="popup-modal-overlay" onClick={handleCloseGarmentModal}>
+            <div className="popup-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="popup-modal-header">
+                <h3 className="popup-modal-title">Garment Details</h3>
+                <button 
+                  className="popup-modal-close"
+                  onClick={handleCloseGarmentModal}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="popup-modal-body">
+                <img
+                  src={selectedGarment.image}
+                  alt={selectedGarment.title || 'Garment'}
+                  className="popup-modal-image"
+                />
+                <div className="popup-modal-details">
+                  {selectedGarment.title && (
+                    <div className="popup-modal-detail-row">
+                      <span className="popup-modal-label">Title:</span>
+                      <span className="popup-modal-value">{selectedGarment.title}</span>
+                    </div>
+                  )}
+                  {selectedGarment.price && (
+                    <div className="popup-modal-detail-row">
+                      <span className="popup-modal-label">Price:</span>
+                      <span className="popup-modal-value">{selectedGarment.price}</span>
+                    </div>
+                  )}
+                  {selectedGarment.sku && (
+                    <div className="popup-modal-detail-row">
+                      <span className="popup-modal-label">SKU:</span>
+                      <span className="popup-modal-value">{selectedGarment.sku}</span>
+                    </div>
+                  )}
+                  {selectedGarment.order !== undefined && (
+                    <div className="popup-modal-detail-row">
+                      <span className="popup-modal-label">Order:</span>
+                      <span className="popup-modal-value">{selectedGarment.order}</span>
+                    </div>
+                  )}
+                  {selectedGarment.url && (
+                    <div className="popup-modal-detail-row">
+                      <span className="popup-modal-label">Product URL:</span>
+                      <a 
+                        href={selectedGarment.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="popup-modal-link"
+                      >
+                        View Product →
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     )

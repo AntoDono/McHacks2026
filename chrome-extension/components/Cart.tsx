@@ -1,8 +1,9 @@
 import { useState } from "react"
 import "../styles/cart.css"
+import type { CartItem } from "~utils/storage"
 
 interface CartProps {
-  items: string[]
+  items: CartItem[]
   onRemoveItem: (index: number) => void
   onTryItOn: () => void
   onClose: () => void
@@ -46,11 +47,11 @@ const Cart = ({ items, onRemoveItem, onTryItOn, onClose, isLoading = false }: Ca
                 <p className="cart-empty-hint">Click "Add to Try" on product images to add them here</p>
               </div>
             ) : (
-              items.map((imageUrl, index) => (
-                <div key={`${imageUrl}-${index}`} className="cart-item">
+              items.map((item, index) => (
+                <div key={`${item.imageUrl}-${index}`} className="cart-item">
                   <img
-                    src={imageUrl}
-                    alt={`Garment ${index + 1}`}
+                    src={item.imageUrl}
+                    alt={item.title || `Garment ${index + 1}`}
                     className="cart-item-image"
                   />
                   <button

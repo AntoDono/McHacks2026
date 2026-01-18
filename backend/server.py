@@ -5,6 +5,7 @@ import time
 import base64
 import sys
 import json
+import requests
 from pathlib import Path
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
@@ -81,15 +82,131 @@ def process_image():
     })
 
 
+def download_image_from_url(url, save_path):
+    """Download an image from URL and save to path"""
+    # Add browser-like headers to avoid getting blocked
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Referer': url.rsplit('/', 1)[0] + '/',  # Use the base URL as referer
+        'Sec-Fetch-Dest': 'image',
+        'Sec-Fetch-Mode': 'no-cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+    }
+    
+    response = requests.get(url, headers=headers, timeout=30, allow_redirects=True)
+    response.raise_for_status()
+    with open(save_path, 'wb') as f:
+        f.write(response.content)
+    return save_path
+
 @app.route("/try-on", methods=["POST"])
 def try_on():
-    person_file = request.files["person"]
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    files_to_cleanup = []  # Track all downloaded files for cleanup
     
-    # Accept multiple garment files
+    # Handle person image - can be file upload or URL
+    person_path = None
+    if "person" in request.files and request.files["person"].filename:
+        # File upload
+        person_file = request.files["person"]
+        person_path = UPLOAD_FOLDER / f"{timestamp}_person_{secure_filename(person_file.filename)}"
+        person_file.save(person_path)
+    elif "person_url" in request.form:
+        # URL download
+        person_url = request.form["person_url"]
+        # Determine extension from URL or default to jpg
+        ext = ".jpg"
+        if "." in person_url.split("/")[-1]:
+            ext = "." + person_url.split(".")[-1].split("?")[0]
+        person_path = UPLOAD_FOLDER / f"{timestamp}_person_downloaded{ext}"
+        try:
+            download_image_from_url(person_url, person_path)
+            files_to_cleanup.append(person_path)
+        except Exception as e:
+            return jsonify({"error": f"Failed to download person image: {str(e)}"}), 400
+    else:
+        return jsonify({"error": "No person image provided (file or URL)"}), 400
+    
+    # Handle garment images - can be file uploads, garments_data (url+base64), or URLs
+    garment_paths = []
+    
+    # First, try file uploads
     garment_files = request.files.getlist("garment")
-    if not garment_files:
-        # Fallback to single garment if sent as single file
-        garment_files = [request.files["garment"]]
+    if garment_files and garment_files[0].filename:
+        for i, garment_file in enumerate(garment_files):
+            garment_path = UPLOAD_FOLDER / f"{timestamp}_garment_{i}_{secure_filename(garment_file.filename)}"
+            garment_file.save(garment_path)
+            garment_paths.append(garment_path)
+    
+    # Then, try garments_data (url + base64) - NEW HYBRID APPROACH
+    if "garments_data" in request.form and not garment_paths:
+        try:
+            garments_data = json.loads(request.form["garments_data"])
+            for i, garment_data in enumerate(garments_data):
+                garment_url = garment_data.get("url")
+                garment_base64 = garment_data.get("base64")
+                
+                # Try base64 first (browser already downloaded it)
+                if garment_base64:
+                    try:
+                        # Remove data URL prefix if present
+                        if garment_base64.startswith("data:"):
+                            garment_base64 = garment_base64.split(",", 1)[1]
+                        
+                        # Decode base64 and save
+                        img_data = base64.b64decode(garment_base64)
+                        garment_path = UPLOAD_FOLDER / f"{timestamp}_garment_{i}_from_browser.jpg"
+                        with open(garment_path, "wb") as f:
+                            f.write(img_data)
+                        garment_paths.append(garment_path)
+                        files_to_cleanup.append(garment_path)
+                        print(f"✓ Saved garment {i} from base64")
+                        continue
+                    except Exception as e:
+                        print(f"Warning: Failed to decode base64 for garment {i}: {str(e)}")
+                
+                # Fall back to URL download if base64 failed or not available
+                if garment_url:
+                    try:
+                        ext = ".jpg"
+                        if "." in garment_url.split("/")[-1]:
+                            ext = "." + garment_url.split(".")[-1].split("?")[0]
+                        garment_path = UPLOAD_FOLDER / f"{timestamp}_garment_{i}_from_url{ext}"
+                        download_image_from_url(garment_url, garment_path)
+                        garment_paths.append(garment_path)
+                        files_to_cleanup.append(garment_path)
+                        print(f"✓ Downloaded garment {i} from URL")
+                    except Exception as e:
+                        print(f"Warning: Failed to download garment {i} from URL: {str(e)}")
+        except json.JSONDecodeError as e:
+            print(f"Warning: Failed to parse garments_data: {str(e)}")
+    
+    # Legacy: Try URL list only (backwards compatibility)
+    if "garment_urls" in request.form and not garment_paths:
+        try:
+            garment_urls = json.loads(request.form["garment_urls"])
+            for i, garment_url in enumerate(garment_urls):
+                # Determine extension from URL or default to jpg
+                ext = ".jpg"
+                if "." in garment_url.split("/")[-1]:
+                    ext = "." + garment_url.split(".")[-1].split("?")[0]
+                garment_path = UPLOAD_FOLDER / f"{timestamp}_garment_url_{len(garment_paths) + i}_downloaded{ext}"
+                try:
+                    download_image_from_url(garment_url, garment_path)
+                    garment_paths.append(garment_path)
+                    files_to_cleanup.append(garment_path)
+                except Exception as e:
+                    print(f"Warning: Failed to download garment {i}: {str(e)}")
+        except json.JSONDecodeError:
+            pass
+    
+    if not garment_paths:
+        return jsonify({"error": "No garment images provided (files, URLs, or base64)"}), 400
     
     # Get optional metadata for garments (sent as JSON string)
     garments_metadata = []
@@ -99,24 +216,15 @@ def try_on():
         except json.JSONDecodeError:
             garments_metadata = []
     
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    person_path = UPLOAD_FOLDER / f"{timestamp}_person_{secure_filename(person_file.filename)}"
-    person_file.save(person_path)
-    
     # Read person image as base64 for database
     with open(person_path, "rb") as img_file:
         person_image_base64 = base64.b64encode(img_file.read()).decode("utf-8")
     person_mime = f"image/{person_path.suffix.lower().replace('.', '')}"
     person_image_data_url = f"data:{person_mime};base64,{person_image_base64}"
     
-    # Save all garment files and prepare metadata
-    garment_paths = []
+    # Prepare garment metadata for database
     garment_images_data = []
-    for i, garment_file in enumerate(garment_files):
-        garment_path = UPLOAD_FOLDER / f"{timestamp}_garment_{i}_{secure_filename(garment_file.filename)}"
-        garment_file.save(garment_path)
-        garment_paths.append(garment_path)
-        
+    for i, garment_path in enumerate(garment_paths):
         # Read garment image as base64 for database
         with open(garment_path, "rb") as img_file:
             garment_image_base64 = base64.b64encode(img_file.read()).decode("utf-8")
@@ -222,12 +330,18 @@ def try_on():
         print(f"Error saving to database: {e}")
 
     # Clean up
-    person_path.unlink()
+    if person_path and person_path.exists():
+        person_path.unlink()
     for garment_path in garment_paths:
-        garment_path.unlink()
+        if garment_path.exists():
+            garment_path.unlink()
     for temp_file in temp_files_to_cleanup:
         if temp_file.exists():
             temp_file.unlink()
+    # Clean up downloaded files
+    for downloaded_file in files_to_cleanup:
+        if downloaded_file.exists():
+            downloaded_file.unlink()
 
     if len(images_base64) > 1:
         valid_images = images_base64[1:]

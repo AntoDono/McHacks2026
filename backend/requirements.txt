@@ -2,6 +2,8 @@ google-genai
 pillow
 python-dotenv
 flask
+flask-cors
+requests
 rembg[cpu]
 peewee
 numpy
