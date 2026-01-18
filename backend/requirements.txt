@@ -3,3 +3,5 @@ pillow
 python-dotenv
 flask
 rembg[cpu]
+peewee
+numpy

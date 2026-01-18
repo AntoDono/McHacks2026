@@ -4,6 +4,7 @@ import os
 import time
 import base64
 import sys
+import json
 from pathlib import Path
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
@@ -19,6 +20,9 @@ sys.path.insert(0, str(image_manip_path))
 from crop_person import process_selfie
 from put_on import put_on
 from generate_views import generate_views
+
+# Import database functions
+from db import save_tryon_session, get_tryon_session, get_all_sessions
 
 app = Flask(__name__)
 CORS(app)
@@ -80,36 +84,89 @@ def process_image():
 @app.route("/try-on", methods=["POST"])
 def try_on():
     person_file = request.files["person"]
-    garment_file = request.files["garment"]
-
+    
+    # Accept multiple garment files
+    garment_files = request.files.getlist("garment")
+    if not garment_files:
+        # Fallback to single garment if sent as single file
+        garment_files = [request.files["garment"]]
+    
+    # Get optional metadata for garments (sent as JSON string)
+    garments_metadata = []
+    if 'garments_metadata' in request.form:
+        try:
+            garments_metadata = json.loads(request.form['garments_metadata'])
+        except json.JSONDecodeError:
+            garments_metadata = []
+    
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     person_path = UPLOAD_FOLDER / f"{timestamp}_person_{secure_filename(person_file.filename)}"
-    garment_path = UPLOAD_FOLDER / f"{timestamp}_garment_{secure_filename(garment_file.filename)}"
-    
     person_file.save(person_path)
-    garment_file.save(garment_path)
-
-    output_filename = f"{timestamp}_tryon.jpg"
-    output_path = PROCESSED_FOLDER / output_filename
-
-    print(f"Running virtual try-on: person={person_path}, garment={garment_path}")
-    result_image = put_on(
-        person=str(person_path),
-        garment=str(garment_path),
-        number_of_images=1,
-        safety_filter_level="BLOCK_LOW_AND_ABOVE",
-        output_mime_type="image/jpeg"
-    )
-
-    temp_output = PROCESSED_FOLDER / f"{timestamp}_temp_tryon.jpg"
-    result_image.save(str(temp_output))
-    time.sleep(0.1)
     
-    # Crop the result image
-    actual_output_path = process_selfie(str(temp_output), str(output_path), padding=20, max_size=1000)
-    output_path = Path(actual_output_path)
-    output_filename = output_path.name
-    temp_output.unlink()
+    # Read person image as base64 for database
+    with open(person_path, "rb") as img_file:
+        person_image_base64 = base64.b64encode(img_file.read()).decode("utf-8")
+    person_mime = f"image/{person_path.suffix.lower().replace('.', '')}"
+    person_image_data_url = f"data:{person_mime};base64,{person_image_base64}"
+    
+    # Save all garment files and prepare metadata
+    garment_paths = []
+    garment_images_data = []
+    for i, garment_file in enumerate(garment_files):
+        garment_path = UPLOAD_FOLDER / f"{timestamp}_garment_{i}_{secure_filename(garment_file.filename)}"
+        garment_file.save(garment_path)
+        garment_paths.append(garment_path)
+        
+        # Read garment image as base64 for database
+        with open(garment_path, "rb") as img_file:
+            garment_image_base64 = base64.b64encode(img_file.read()).decode("utf-8")
+        garment_mime = f"image/{garment_path.suffix.lower().replace('.', '')}"
+        garment_image_data_url = f"data:{garment_mime};base64,{garment_image_base64}"
+        
+        # Get metadata for this garment if available
+        metadata = garments_metadata[i] if i < len(garments_metadata) else {}
+        garment_images_data.append({
+            'image': garment_image_data_url,
+            'sku': metadata.get('sku'),
+            'url': metadata.get('url'),
+            'title': metadata.get('title'),
+            'price': metadata.get('price'),
+            'metadata': json.dumps(metadata) if metadata else None
+        })
+    
+    # Start with person image as output
+    output = str(person_path)
+    temp_files_to_cleanup = []
+    
+    # Iteratively apply each garment
+    for i, garment_path in enumerate(garment_paths):
+        print(f"Running virtual try-on iteration {i+1}/{len(garment_paths)}: person={output}, garment={garment_path}")
+        result_image = put_on(
+            person=output,
+            garment=str(garment_path),
+            number_of_images=1,
+            safety_filter_level="BLOCK_LOW_AND_ABOVE",
+            output_mime_type="image/jpeg"
+        )
+        
+        # Save intermediate result
+        temp_output = PROCESSED_FOLDER / f"{timestamp}_temp_iter_{i}.jpg"
+        result_image.save(str(temp_output))
+        time.sleep(0.1)
+        
+        # Update output to the new result for next iteration
+        # If this isn't the last iteration, save it as a temp file
+        if i < len(garment_paths) - 1:
+            temp_files_to_cleanup.append(temp_output)
+            output = str(temp_output)
+        else:
+            # Last iteration - this is our final output
+            output_filename = f"{timestamp}_tryon.jpg"
+            output_path = PROCESSED_FOLDER / output_filename
+            actual_output_path = process_selfie(str(temp_output), str(output_path), padding=20, max_size=1000)
+            output_path = Path(actual_output_path)
+            output_filename = output_path.name
+            temp_output.unlink()
 
     # Generate multiple views
     print(f"Generating multiple views from: {output_path}")
@@ -143,15 +200,46 @@ def try_on():
         mime_type = "image/png" if output_path.suffix.lower() == ".png" else "image/jpeg"
         images_base64.insert(0, f"data:{mime_type};base64,{img_data}")
 
+    # Prepare generated images data for database
+    generated_images_data = []
+    for i, img_base64 in enumerate(images_base64):
+        generated_images_data.append({
+            'image': img_base64,
+            'is_main': i == 0,
+            'view_index': i
+        })
+    
+    # Save to database
+    try:
+        save_tryon_session(
+            timestamp=timestamp,
+            person_image_base64=person_image_data_url,
+            garment_images_data=garment_images_data,
+            generated_images_data=generated_images_data
+        )
+        print(f"Saved try-on session to database: {timestamp}")
+    except Exception as e:
+        print(f"Error saving to database: {e}")
+
     # Clean up
     person_path.unlink()
-    garment_path.unlink()
+    for garment_path in garment_paths:
+        garment_path.unlink()
+    for temp_file in temp_files_to_cleanup:
+        if temp_file.exists():
+            temp_file.unlink()
+
+    if len(images_base64) > 1:
+        valid_images = images_base64[1:]
+    else:
+        valid_images = images_base64
 
     return jsonify({
         "success": True,
-        "images": images_base64[1:],
+        "images": valid_images,
         "image": images_base64[0] if images_base64 else None,
-        "filename": output_filename
+        "filename": output_filename,
+        "timestamp": timestamp
     })
 
 
@@ -159,6 +247,45 @@ def try_on():
 def get_processed_image(filename: str):
     file_path = PROCESSED_FOLDER / secure_filename(filename)
     return send_file(file_path, mimetype="image/png")
+
+
+@app.route("/sessions", methods=["GET"])
+def get_sessions():
+    """Get all try-on sessions"""
+    try:
+        limit = request.args.get('limit', 50, type=int)
+        sessions = get_all_sessions(limit=limit)
+        return jsonify({
+            "success": True,
+            "sessions": sessions
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route("/sessions/<timestamp>", methods=["GET"])
+def get_session(timestamp: str):
+    """Get a specific try-on session with all details"""
+    try:
+        session = get_tryon_session(timestamp)
+        if session:
+            return jsonify({
+                "success": True,
+                "session": session
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Session not found"
+            }), 404
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 
 if __name__ == "__main__":
