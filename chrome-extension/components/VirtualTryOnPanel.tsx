@@ -10,10 +10,11 @@ interface VirtualTryOnPanelProps {
   tryOnResultImages?: string[]
   isLoading?: boolean
   onClose: () => void
+  onStartVirtualTryOn?: () => void
   onImagesChange?: (images: string[]) => void
 }
 
-const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], isLoading, onClose, onImagesChange }: VirtualTryOnPanelProps) => {
+const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], isLoading, onClose, onStartVirtualTryOn, onImagesChange }: VirtualTryOnPanelProps) => {
   const [images, setImages] = useState<string[]>(productImages)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
@@ -157,7 +158,7 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
           {images.length > 0 ? (
             <>
               <p style={{ fontSize: "14px", color: "#666", marginBottom: "12px" }}>
-                Click × to remove products you don't want to try on
+                Make sure to only include one image per product category (e.g. shoes, tops, bottoms, etc.). The image should be of the entire product and should not include any other objects or people.
               </p>
               <div className="virtual-try-on-products-grid">
                 {images.map((src, index) => (
@@ -197,6 +198,22 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
             </div>
           )}
         </div>
+
+        {/* Start Try-On Button */}
+        {images.length > 0 && !isLoading && tryOnResultImages.length === 0 && onStartVirtualTryOn && (
+          <div style={{ marginTop: "24px", paddingTop: "24px", borderTop: "1px solid #e0e0e0" }}>
+            <button
+              className="virtual-try-on-start-button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onStartVirtualTryOn()
+              }}
+              onMouseDown={createStopPropagationHandler()}
+            >
+              Start Virtual Try-On
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
