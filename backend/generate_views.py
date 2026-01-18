@@ -3,6 +3,7 @@ from PIL import Image
 import asyncio
 import tempfile
 import os
+import uuid
 
 client = genai.Client()
 
@@ -64,20 +65,23 @@ def generate_views(image_path):
         image_path (str): Path to the input image
         
     Returns:
-        dict: Dictionary with keys 0, 90, 180, 270 mapping to temp file paths
+        list: Array of 4 file paths in order [0°, 90°, 180°, 270°]
         
     Example:
         >>> paths = generate_views("input.png")
-        >>> print(paths[0])    # Front view
-        >>> print(paths[90])   # Left side
-        >>> print(paths[180])  # Back view
-        >>> print(paths[270])  # Right side
+        >>> print(paths[0])  # Front view (0°)
+        >>> print(paths[1])  # Left side (90°)
+        >>> print(paths[2])  # Back view (180°)
+        >>> print(paths[3])  # Right side (270°)
     """
     # Load image
     image = Image.open(image_path)
     
-    # Create temp directory
-    temp_dir = tempfile.mkdtemp(prefix="multiview_")
+    # Create temp directory with UUID
+    temp_base = tempfile.gettempdir()
+    unique_id = str(uuid.uuid4())
+    temp_dir = os.path.join(temp_base, f"multiview_{unique_id}")
+    os.makedirs(temp_dir, exist_ok=True)
     
     # Generate all views
     loop = asyncio.new_event_loop()
@@ -85,12 +89,8 @@ def generate_views(image_path):
     results = loop.run_until_complete(_generate_all_views(image, temp_dir))
     loop.close()
     
-    # Map results to angles
-    result_dict = {}
-    for angle, path in zip(prompts.keys(), results):
-        result_dict[angle] = path
-    
-    return result_dict
+    # Return as array (filter out None values, but keep order)
+    return [path for path in results if path is not None]
 
 
 if __name__ == "__main__":
@@ -122,7 +122,8 @@ if __name__ == "__main__":
     # Display results
     print("\nGenerated views:")
     successful = 0
-    for angle, path in zip(prompts.keys(), results):
+    angles = list(prompts.keys())
+    for i, (angle, path) in enumerate(zip(angles, results)):
         if path and os.path.exists(path):
             size = os.path.getsize(path) / 1024
             print(f"  {angle:>3}°: {path} ({size:.1f} KB)")
