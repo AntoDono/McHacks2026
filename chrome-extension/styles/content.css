@@ -1,45 +1,55 @@
 @import './globals.css';
 
-.image-preview-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 999999;
-  background-color: var(--surface);
-  border: 2px solid var(--accent);
-  border-radius: 8px;
-  padding: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  max-width: 300px;
-  max-height: 300px;
-  cursor: pointer;
+.try-on-button-container {
   pointer-events: auto;
-  animation: slideIn 0.2s ease-out;
+  animation: fadeIn 0.2s ease-out;
+  cursor: default;
 }
 
-@keyframes slideIn {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: scale(1);
   }
 }
 
-.image-preview-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
+.try-on-button {
+  padding: 10px 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.image-preview-text {
-  margin-top: 4px;
-  font-size: 10px;
-  color: var(--text-light);
-  text-align: center;
+.try-on-button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: scale(1.05);
+}
+
+.try-on-button:active {
+  transform: scale(0.98);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* UserInfo Component */
@@ -133,4 +143,115 @@
   background-color: white;
   border-radius: 15px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Notification styles */
+.try-on-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 999999;
+  max-width: 300px;
+  font-size: 14px;
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Overlay styles */
+.try-on-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  pointer-events: auto !important;
+}
+
+.try-on-overlay * {
+  pointer-events: auto !important;
+}
+
+.try-on-overlay-content {
+  background-color: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 800px;
+  max-height: 90vh;
+  width: 100%;
+  overflow-y: auto;
+  position: relative;
+  pointer-events: auto;
+}
+
+.try-on-overlay-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+  padding: 4px 8px;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.try-on-overlay-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #1a1a1a;
+}
+
+.try-on-overlay-section {
+  margin-bottom: 24px;
+}
+
+.try-on-overlay-section-title {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.try-on-overlay-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.try-on-overlay-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+}
+
+.try-on-overlay-start-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.try-on-overlay-start-button:hover {
+  background-color: #333;
 }

@@ -203,7 +203,6 @@ const Setup = ({ onSetupComplete, onClose }: SetupProps) => {
                 className="preview-image"
                 onClick={(e) => e.stopPropagation()}
                 onContextMenu={(e) => e.preventDefault()}
-                style={{ pointerEvents: "none" }}
               />
             ) : (
               <div className="dropzone-content">

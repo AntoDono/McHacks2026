@@ -1,0 +1,139 @@
+@import './globals.css';
+
+/* Popup Container */
+.popup-container {
+  padding: 20px;
+  width: 380px;
+  background-color: #f8f9fa;
+}
+
+/* Loading State */
+.popup-loading {
+  padding: 24px;
+  text-align: center;
+}
+
+/* Welcome Header */
+.popup-welcome-header {
+  color: #1a1a1a;
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* Main Content Card */
+.popup-main-card {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  background-color: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.popup-photo-container {
+  flex-shrink: 0;
+}
+
+.popup-profile-photo {
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
+  object-fit: contain;
+  border: 2px solid var(--primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: block;
+  background-color: #f5f5f5;
+}
+
+.popup-user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.popup-user-name {
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.popup-user-details {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.popup-detail-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  gap: 8px;
+}
+
+.popup-detail-label {
+  font-weight: 500;
+  color: #888;
+  min-width: 50px;
+}
+
+.popup-detail-value {
+  color: #333;
+}
+
+/* Gallery Section */
+.popup-gallery-section {
+  margin-bottom: 20px;
+}
+
+.popup-gallery-header {
+  color: #1a1a1a;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.popup-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: white;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.popup-gallery-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+/* Reset Button */
+.popup-reset-button {
+  padding: 12px 20px;
+  background-color: white;
+  color: #666;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.popup-reset-button:hover {
+  background-color: #fff5f5;
+  border-color: #ffb3b3;
+  color: #d32f2f;
+}
