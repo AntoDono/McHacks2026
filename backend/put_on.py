@@ -28,6 +28,7 @@ def put_on(
     number_of_images: int = 1,
     safety_filter_level: str = "BLOCK_LOW_AND_ABOVE",
     output_mime_type: str = "image/jpeg",
+    person_generation: str = "ALLOW_ALL",
 ) -> Image:
     """Generate an image of a person wearing a garment."""
     client = _get_client()
@@ -45,6 +46,7 @@ def put_on(
             output_mime_type=output_mime_type,
             number_of_images=number_of_images,
             safety_filter_level=safety_filter_level,
+            person_generation=person_generation,
         ),
     )
     
