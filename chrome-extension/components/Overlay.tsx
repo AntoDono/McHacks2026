@@ -9,6 +9,7 @@ interface OverlayProps {
   onClose: () => void
   onSetupComplete: () => void
   onStartVirtualTryOn: () => void
+  onImagesChange?: (images: string[]) => void
 }
 
 const Overlay = ({
@@ -17,7 +18,8 @@ const Overlay = ({
   userData,
   onClose,
   onSetupComplete,
-  onStartVirtualTryOn
+  onStartVirtualTryOn,
+  onImagesChange
 }: OverlayProps) => {
   if (!showOverlay) return null
 
@@ -49,26 +51,48 @@ const Overlay = ({
               <h3 className="try-on-overlay-section-title">
                 Selected Images ({selectedImages.length})
               </h3>
-              <div className="try-on-overlay-images-grid">
-                {selectedImages.map((src, index) => (
-                  <img
-                    key={index}
-                    src={src}
-                    alt={`Product ${index + 1}`}
-                    className="try-on-overlay-image"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none"
-                    }}
-                  />
-                ))}
-              </div>
+              {selectedImages.length > 0 ? (
+                <>
+                  <p style={{ fontSize: "14px", color: "#666", marginBottom: "12px" }}>
+                    Click to remove products you don't want to try on
+                  </p>
+                  <div className="try-on-overlay-images-grid">
+                    {selectedImages.map((src, index) => (
+                      <div key={index} className="try-on-overlay-image-item">
+                        <div className="try-on-overlay-image-wrapper">
+                          <img
+                            src={src}
+                            alt={`Product ${index + 1}`}
+                            className="try-on-overlay-image"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none"
+                            }}
+                          />
+                        </div>
+                        <button
+                          className="try-on-overlay-remove-button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onImagesChange?.(selectedImages.filter((_, i) => i !== index))
+                          }}
+                          onMouseDown={createStopPropagationHandler()}
+                          aria-label="Remove product"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="try-on-overlay-no-images">
+                  <p>No images selected. Close this overlay to start over.</p>
+                </div>
+              )}
             </div>
             <button
               className="try-on-overlay-start-button"
-              onClick={createPreventClickHandler(() => {
-                console.log("Start Virtual Try-On clicked!")
-                onStartVirtualTryOn()
-              })}
+              onClick={createPreventClickHandler(onStartVirtualTryOn)}
               onMouseDown={createStopPropagationHandler()}
             >
               Start Virtual Try-On
