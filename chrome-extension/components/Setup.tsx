@@ -70,18 +70,8 @@ const Setup = ({ onSetupComplete, onClose }: SetupProps) => {
     }
   }
 
-  const handleCloseClick = (e: React.MouseEvent) => {
-    preventDefaultAndStop(e)
-    onClose?.()
-  }
-
   return (
     <div className="setup-container">
-      {onClose && (
-        <button className="setup-close" onClick={handleCloseClick}>
-          ×
-        </button>
-      )}
       <h1 className="setup-title">Setup</h1>
       <p className="setup-subtitle">Upload your photo and enter your information</p>
 

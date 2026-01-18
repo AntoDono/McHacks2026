@@ -1,7 +1,7 @@
 /* Custom Fonts */
 @font-face {
   font-family: 'Megant';
-  src: url('../assets/fonts/Megant.ttf') format('truetype');
+  src: url(data-base64:~assets/fonts/Megant.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -9,7 +9,7 @@
 
 @font-face {
   font-family: 'CreatoDisplay';
-  src: url('../assets/fonts/CreatoDisplay.otf') format('opentype');
+  src: url(data-base64:~assets/fonts/CreatoDisplay.otf) format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -76,5 +76,5 @@
 #plasmo-image-overlay-root h5,
 #plasmo-image-overlay-root h6 {
   font-family: var(--font-title) !important;
-  font-weight: normal !important;
+  font-weight: 500 !important;
 }

@@ -14,7 +14,8 @@ import "./styles/content.css"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
-  all_frames: false
+  all_frames: false,
+  css: ["./styles/globals.css"]
 }
 
 export const getRootContainer: PlasmoGetRootContainer = () => {
