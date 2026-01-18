@@ -1,5 +1,26 @@
+/* Custom Fonts */
+@font-face {
+  font-family: 'Megant';
+  src: url('../assets/fonts/Megant.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CreatoDisplay';
+  src: url('../assets/fonts/CreatoDisplay.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Quiet Luxury Color Scheme */
 :root {
+  /* Font Families */
+  --font-title: 'Megant', Georgia, serif;
+  --font-text: 'CreatoDisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
   /* Primary Colors */
   --primary: #988876; /* Roasted Cashew */
   --primary-light: #a89886;
@@ -31,6 +52,20 @@
   --border: #C7C1BE;
   --border-light: #E8DCC4;
   --border-dark: #54534F;
+}
+
+/* Base Typography */
+* {
+  box-sizing: border-box;
+}
+
+body, p, span, div, input, button, textarea {
+  font-family: var(--font-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: normal;
 }
 
 /* Optional: Dark mode variants */
