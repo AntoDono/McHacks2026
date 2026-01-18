@@ -143,7 +143,7 @@ const Cart = ({ items, onRemoveItem, onTryItOn, onClose, isLoading = false, prog
             <div className="cart-recommendations">
               <div className="cart-recommendations-header">
                 <h4 className="cart-recommendations-title">
-                  ✨ You might also like
+                  You might also like
                 </h4>
                 <button
                   className="cart-recommendations-toggle"
