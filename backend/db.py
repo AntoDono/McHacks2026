@@ -181,44 +181,61 @@ def save_tryon_session(timestamp, person_image_base64, garment_images_data, gene
         Session document
     """
     try:
-        # Create session document
-        session_doc = {
-            'timestamp': timestamp,
-            'person_image': person_image_base64,
-            'created_at': datetime.now()
-        }
-        sessions_collection.insert_one(session_doc)
+        # Track garment references for this session
+        garment_refs = []
         
-        # Save garment images with embeddings (skip duplicates by URL)
-        garment_docs = []
+        # Save garment images with embeddings (reuse existing garments by URL)
         for i, garment_data in enumerate(garment_images_data):
             garment_url = garment_data.get('url')
+            garment_id = None
             
             # Check if garment with same URL already exists
             if garment_url:
                 existing = garments_collection.find_one({'url': garment_url})
                 if existing:
-                    print(f"Skipping duplicate garment (URL already exists): {garment_url[:60]}...")
-                    continue
+                    print(f"Reusing existing garment: {garment_url[:60]}...")
+                    garment_id = existing['_id']
+                    # Add this session to the garment's session list
+                    garments_collection.update_one(
+                        {'_id': garment_id},
+                        {'$addToSet': {'sessions': timestamp}}
+                    )
             
-            # Generate embedding for the garment image
-            embedding = generate_garment_embedding(garment_data['image'])
+            # If garment doesn't exist, create new one
+            if not garment_id:
+                # Generate embedding for the garment image
+                embedding = generate_garment_embedding(garment_data['image'])
+                
+                garment_doc = {
+                    'image': garment_data['image'],
+                    'sku': garment_data.get('sku'),
+                    'url': garment_url,
+                    'title': garment_data.get('title'),
+                    'price': garment_data.get('price'),
+                    'metadata': garment_data.get('metadata'),
+                    'embedding': embedding,
+                    'sessions': [timestamp],  # Track which sessions use this garment
+                    'created_at': datetime.now()
+                }
+                result = garments_collection.insert_one(garment_doc)
+                garment_id = result.inserted_id
+                print(f"Created new garment: {garment_data.get('title', 'Untitled')[:60]}...")
             
-            garment_doc = {
-                'session_timestamp': timestamp,
-                'image': garment_data['image'],
+            # Store reference with order information
+            garment_refs.append({
+                'garment_id': garment_id,
                 'order': i,
-                'sku': garment_data.get('sku'),
-                'url': garment_url,
-                'title': garment_data.get('title'),
-                'price': garment_data.get('price'),
-                'metadata': garment_data.get('metadata'),
-                'embedding': embedding
-            }
-            garment_docs.append(garment_doc)
+                'url': garment_url
+            })
         
-        if garment_docs:
-            garments_collection.insert_many(garment_docs)
+        # Create session document with garment references
+        session_doc = {
+            'timestamp': timestamp,
+            'person_image': person_image_base64,
+            'garments': garment_refs,  # References to garments used in this session
+            'created_at': datetime.now()
+        }
+        sessions_collection.insert_one(session_doc)
         
         # Save generated images
         generated_docs = []
@@ -252,22 +269,22 @@ def get_tryon_session(timestamp):
         if not session:
             return None
         
-        # Get garment images
+        # Get garment images using references
         garments = []
-        garment_docs = garments_collection.find(
-            {'session_timestamp': timestamp}
-        ).sort('order', 1)
+        garment_refs = session.get('garments', [])
         
-        for garment in garment_docs:
-            garments.append({
-                'image': garment['image'],
-                'order': garment['order'],
-                'sku': garment.get('sku'),
-                'url': garment.get('url'),
-                'title': garment.get('title'),
-                'price': garment.get('price'),
-                'metadata': garment.get('metadata')
-            })
+        for ref in garment_refs:
+            garment_doc = garments_collection.find_one({'_id': ref['garment_id']})
+            if garment_doc:
+                garments.append({
+                    'image': garment_doc['image'],
+                    'order': ref['order'],
+                    'sku': garment_doc.get('sku'),
+                    'url': garment_doc.get('url'),
+                    'title': garment_doc.get('title'),
+                    'price': garment_doc.get('price'),
+                    'metadata': garment_doc.get('metadata')
+                })
         
         # Get generated images
         generated_images = []
@@ -324,10 +341,10 @@ def get_all_sessions(limit=50):
                 if first_gen:
                     main_image = first_gen['image']
             
-            # Count garments and generated images
-            garment_count = garments_collection.count_documents({
-                'session_timestamp': session['timestamp']
-            })
+            # Count garments from session references
+            garment_count = len(session.get('garments', []))
+            
+            # Count generated images
             generated_count = generated_images_collection.count_documents({
                 'session_timestamp': session['timestamp']
             })

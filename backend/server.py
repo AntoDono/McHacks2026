@@ -519,25 +519,19 @@ def try_on_stream():
                 time.sleep(0.1)
                 
                 # Process the output (crop/resize) - get temp path
-                temp_processed = process_selfie(str(temp_output_raw), padding=20, max_size=1000)
+                temp_output = Path(process_selfie(str(temp_output_raw), padding=20, max_size=1000))
                 temp_output_raw.unlink()  # Clean up raw file
                 
-                # Save intermediate result to PROCESSED_FOLDER for preview
-                intermediate_filename = f"{timestamp}_iter_{i}.png"
-                intermediate_path = PROCESSED_FOLDER / intermediate_filename
-                shutil.move(temp_processed, str(intermediate_path))
-                
-                # Yield intermediate result with filename (frontend will fetch it)
-                yield f"data: {json.dumps({'type': 'intermediate_result', 'filename': intermediate_filename, 'garment': i+1, 'total': len(garment_paths)})}\n\n"
-                
                 if i < len(garment_paths) - 1:
-                    temp_files_to_cleanup.append(intermediate_path)
-                    output = str(intermediate_path)
+                    temp_files_to_cleanup.append(temp_output)
+                    output = str(temp_output)
                 else:
-                    # Final iteration - rename intermediate to final output
                     output_filename = f"{timestamp}_tryon.png"
                     output_path = PROCESSED_FOLDER / output_filename
-                    shutil.move(str(intermediate_path), str(output_path))
+                    temp_processed = process_selfie(str(temp_output), padding=20, max_size=1000)
+                    # Move temp to final location
+                    shutil.move(temp_processed, str(output_path))
+                    temp_output.unlink()
             
             yield f"data: {json.dumps({'type': 'status', 'message': '📸 Taking your photos...', 'progress': 75})}\n\n"
             
