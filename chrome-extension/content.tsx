@@ -1,7 +1,6 @@
 import type { PlasmoCSConfig, PlasmoGetRootContainer } from "plasmo"
 import { useEffect, useState } from "react"
 
-import { getGalleryImages } from "~utils/gallery-detection"
 import { getUserData, getCartItems, addToCart, removeFromCart, saveCartItems, type CartItem } from "~utils/storage"
 import type { UserData } from "~types/user"
 import VirtualTryOnPanel from "~components/VirtualTryOnPanel"
@@ -77,90 +76,112 @@ const ContentScript = () => {
     }, BUTTON_LEAVE_DELAY)
   }
 
+  // Helper function to get the actual image URL from an image element
+  const getImageUrl = (img: HTMLImageElement): string | null => {
+    // Check for lazy-load attributes first
+    const lazySrc = img.getAttribute('data-src') || 
+                    img.getAttribute('data-lazy-src') || 
+                    img.getAttribute('data-original') ||
+                    img.getAttribute('data-srcset')?.split(',')[0]?.trim().split(' ')[0]
+    
+    if (lazySrc && lazySrc !== 'data:,' && !lazySrc.startsWith('data:,')) {
+      return lazySrc
+    }
+    
+    // Check srcset for responsive images
+    if (img.srcset) {
+      const srcsetUrls = img.srcset.split(',').map(s => s.trim().split(' ')[0])
+      const validUrl = srcsetUrls.find(url => url && !url.startsWith('data:,'))
+      if (validUrl) return validUrl
+    }
+    
+    // Use src if it's valid
+    if (img.src && img.src !== 'data:,' && !img.src.startsWith('data:,')) {
+      return img.src
+    }
+    
+    return null
+  }
+
   const handleButtonClick = async (e: React.MouseEvent) => {
     if (!hoveredImage) return
 
     try {
-      const galleryImages = getGalleryImages(hoveredImage)
-      console.log("Found gallery images:", galleryImages.length, galleryImages)
-
-      if (galleryImages.length > 0) {
-        // Extract product metadata once for the current page
-        const baseMetadata = extractProductMetadata(galleryImages[0])
-        
-        // Add all gallery images to cart with metadata AND base64
-        let updatedCart = [...cartItems]
-        let addedCount = 0
-        
-        for (const imageUrl of galleryImages) {
-          if (!updatedCart.some(item => item.imageUrl === imageUrl)) {
-            console.log(`Fetching and encoding image: ${imageUrl}`)
-            
-            // Fetch and convert to base64 immediately (while we have access)
-            let base64Data: string | null = null
-            try {
-              const response = await fetch(imageUrl)
-              const blob = await response.blob()
-              
-              // Convert to base64
-              const reader = new FileReader()
-              base64Data = await new Promise<string>((resolve, reject) => {
-                reader.onloadend = () => resolve(reader.result as string)
-                reader.onerror = reject
-                reader.readAsDataURL(blob)
-              })
-              console.log(`✓ Encoded image to base64 (${Math.round(base64Data.length / 1024)}KB)`)
-            } catch (error) {
-              console.error(`Failed to fetch/encode image:`, error)
-              // Continue without base64, URL will be fallback
-            }
-            
-            const cartItem: CartItem = {
-              imageUrl,
-              base64: base64Data,
-              url: baseMetadata.url,
-              title: baseMetadata.title,
-              price: baseMetadata.price,
-              sku: baseMetadata.sku,
-              brand: baseMetadata.brand
-            }
-            updatedCart.push(cartItem)
-            addedCount++
-          }
-        }
-        
-        if (addedCount > 0) {
-          await saveCartItems(updatedCart)
-          setCartItems(updatedCart)
-          setShowCart(true)
-          console.log(`Added ${addedCount} item(s) to cart with metadata and base64. Total: ${updatedCart.length}`)
-          
-          // Update badge
-          try {
-            chrome.runtime.sendMessage(
-              {
-                type: "CART_UPDATED",
-                count: updatedCart.length
-              },
-              (response) => {
-                if (chrome.runtime.lastError) {
-                  console.log("Message failed (this is normal):", chrome.runtime.lastError.message)
-                }
-              }
-            )
-          } catch (err) {
-            console.log("Could not send message (this is normal)")
-          }
-        } else {
-          console.log("All images already in cart")
-        }
-        
-        setHoveredImage(null)
-      } else {
-        console.warn("No gallery images found - only found the clicked image")
+      // Get only the hovered image URL, not the entire gallery
+      const imageUrl = getImageUrl(hoveredImage)
+      
+      if (!imageUrl) {
+        console.warn("Could not extract image URL from hovered image")
+        return
       }
+
+      // Check if image is already in cart
+      if (cartItems.some(item => item.imageUrl === imageUrl)) {
+        console.log("Image already in cart")
+        return
+      }
+
+      console.log("Adding single image to cart:", imageUrl)
+
+      // Extract product metadata from the current page
+      const baseMetadata = extractProductMetadata(imageUrl)
+      
+      // Fetch and convert to base64 immediately (while we have access)
+      let base64Data: string | null = null
+      try {
+        const response = await fetch(imageUrl)
+        const blob = await response.blob()
+        
+        // Convert to base64
+        const reader = new FileReader()
+        base64Data = await new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
+        console.log(`✓ Encoded image to base64 (${Math.round(base64Data.length / 1024)}KB)`)
+      } catch (error) {
+        console.error(`Failed to fetch/encode image:`, error)
+        // Continue without base64, URL will be fallback
+      }
+      
+      const cartItem: CartItem = {
+        imageUrl,
+        base64: base64Data,
+        url: baseMetadata.url,
+        title: baseMetadata.title,
+        price: baseMetadata.price,
+        sku: baseMetadata.sku,
+        brand: baseMetadata.brand
+      }
+      
+      const updatedCart = [...cartItems, cartItem]
+      await saveCartItems(updatedCart)
+      setCartItems(updatedCart)
+      setShowCart(true)
+      console.log(`Added 1 item to cart with metadata and base64. Total: ${updatedCart.length}`)
+      
+      // Update badge
+      try {
+        chrome.runtime.sendMessage(
+          {
+            type: "CART_UPDATED",
+            count: updatedCart.length
+          },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              console.log("Message failed (this is normal):", chrome.runtime.lastError.message)
+            }
+          }
+        )
+      } catch (err) {
+        console.log("Could not send message (this is normal)")
+      }
+      
+      setHoveredImage(null)
     } catch (error) {
       console.error("Error adding to cart:", error)
+      alert("Failed to add item to cart. Please try again.")
     }
   }
 

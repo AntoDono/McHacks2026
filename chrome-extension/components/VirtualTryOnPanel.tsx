@@ -17,6 +17,9 @@ interface VirtualTryOnPanelProps {
 const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], isLoading, onClose, onStartVirtualTryOn, onImagesChange }: VirtualTryOnPanelProps) => {
   const [images, setImages] = useState<string[]>(productImages)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
+  const [selectedImageGallery, setSelectedImageGallery] = useState<string[]>([])
 
   useEffect(() => {
     setImages(productImages)
@@ -54,6 +57,63 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
 
   const hasMultipleResults = tryOnResultImages.length > 1
   const currentResultImage = tryOnResultImages[currentImageIndex]
+
+  // Handle opening image modal with context
+  const handleImageClick = (imageUrl: string, gallery: string[], index: number) => {
+    setSelectedImage(imageUrl)
+    setSelectedImageGallery(gallery)
+    setSelectedImageIndex(index)
+  }
+
+  // Handle arrow key navigation in modal
+  useEffect(() => {
+    if (!selectedImage) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        const prevIndex = selectedImageIndex === 0 
+          ? selectedImageGallery.length - 1 
+          : selectedImageIndex - 1
+        setSelectedImageIndex(prevIndex)
+        setSelectedImage(selectedImageGallery[prevIndex])
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        const nextIndex = selectedImageIndex === selectedImageGallery.length - 1 
+          ? 0 
+          : selectedImageIndex + 1
+        setSelectedImageIndex(nextIndex)
+        setSelectedImage(selectedImageGallery[nextIndex])
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        setSelectedImage(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedImage, selectedImageIndex, selectedImageGallery])
+
+  const handleModalPrev = () => {
+    const prevIndex = selectedImageIndex === 0 
+      ? selectedImageGallery.length - 1 
+      : selectedImageIndex - 1
+    setSelectedImageIndex(prevIndex)
+    setSelectedImage(selectedImageGallery[prevIndex])
+  }
+
+  const handleModalNext = () => {
+    const nextIndex = selectedImageIndex === selectedImageGallery.length - 1 
+      ? 0 
+      : selectedImageIndex + 1
+    setSelectedImageIndex(nextIndex)
+    setSelectedImage(selectedImageGallery[nextIndex])
+  }
+
+  const handleThumbnailClick = (index: number) => {
+    setSelectedImageIndex(index)
+    setSelectedImage(selectedImageGallery[index])
+  }
 
   return (
     <div
@@ -100,6 +160,8 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
                   src={currentResultImage}
                   alt={`Virtual Try-On Result - View ${currentImageIndex + 1}`}
                   className="virtual-try-on-profile-image"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleImageClick(currentResultImage, tryOnResultImages, currentImageIndex)}
                   onError={(e) => {
                     e.currentTarget.style.display = "none"
                   }}
@@ -138,6 +200,8 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
                 src={userData.photo}
                 alt="Profile"
                 className="virtual-try-on-profile-image"
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleImageClick(userData.photo!, [userData.photo!], 0)}
                 onError={(e) => {
                   e.currentTarget.style.display = "none"
                 }}
@@ -168,6 +232,8 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
                         src={src}
                         alt={`Product ${index + 1}`}
                         className="virtual-try-on-product-image"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleImageClick(src, images, index)}
                         onError={(e) => {
                           e.currentTarget.style.display = "none"
                         }}
@@ -215,6 +281,67 @@ const VirtualTryOnPanel = ({ userData, productImages, tryOnResultImages = [], is
           </div>
         )}
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && selectedImageGallery.length > 0 && (
+        <div 
+          className="virtual-try-on-image-modal-overlay"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div 
+            className="virtual-try-on-image-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="virtual-try-on-image-modal-close"
+              onClick={() => setSelectedImage(null)}
+              aria-label="Close image"
+            >
+              ×
+            </button>
+            
+            {selectedImageGallery.length > 1 && (
+              <>
+                <button
+                  className="virtual-try-on-image-modal-arrow virtual-try-on-image-modal-prev"
+                  onClick={handleModalPrev}
+                  aria-label="Previous image"
+                >
+                  ‹
+                </button>
+                <button
+                  className="virtual-try-on-image-modal-arrow virtual-try-on-image-modal-next"
+                  onClick={handleModalNext}
+                  aria-label="Next image"
+                >
+                  ›
+                </button>
+              </>
+            )}
+            
+            <div className="virtual-try-on-image-modal-image-wrapper">
+              <img
+                src={selectedImage}
+                alt={`Image ${selectedImageIndex + 1} of ${selectedImageGallery.length}`}
+                className="virtual-try-on-image-modal-image"
+              />
+            </div>
+            
+            {selectedImageGallery.length > 1 && (
+              <div className="virtual-try-on-image-modal-dots">
+                {selectedImageGallery.map((_, idx) => (
+                  <button
+                    key={idx}
+                    className={`virtual-try-on-image-modal-dot ${idx === selectedImageIndex ? 'active' : ''}`}
+                    onClick={() => handleThumbnailClick(idx)}
+                    aria-label={`View image ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

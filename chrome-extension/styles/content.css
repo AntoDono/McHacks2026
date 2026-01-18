@@ -37,7 +37,7 @@
   background-color: var(--primary) !important;
   color: var(--surface) !important;
   border: none !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
   font-size: 14px !important;
   font-weight: 500 !important;
   cursor: pointer !important;
@@ -131,7 +131,7 @@
   object-fit: contain !important;
   display: block !important;
   margin: 0 auto 16px !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
 }
 
 #plasmo-image-overlay-root .user-info-info {
@@ -187,7 +187,7 @@
   background-color: var(--overlay-black-90) !important;
   color: var(--text-on-dark) !important;
   padding: 12px 20px !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
   box-shadow: var(--shadow-lg) !important;
   z-index: 2147483647 !important;
   max-width: 300px !important;
@@ -306,7 +306,7 @@
   width: 100% !important;
   height: 150px !important;
   overflow: hidden !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
   display: block !important;
   box-sizing: border-box !important;
 }
@@ -318,7 +318,7 @@
   object-fit: cover !important;
   display: block !important;
   border: 2px solid var(--border-light) !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
   box-sizing: border-box !important;
 }
 
@@ -376,7 +376,7 @@
   background-color: var(--text-primary) !important;
   color: var(--text-on-dark) !important;
   border: none !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
   font-size: 16px !important;
   font-weight: 500 !important;
   cursor: pointer !important;

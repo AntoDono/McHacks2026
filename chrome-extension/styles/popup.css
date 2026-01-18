@@ -23,7 +23,7 @@
 
 .popup-container::-webkit-scrollbar-thumb {
   background: var(--neutral-grey);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 
 /* Loading State */
@@ -174,12 +174,12 @@
 
 .popup-gallery-grid::-webkit-scrollbar-track {
   background: var(--neutral-light);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 
 .popup-gallery-grid::-webkit-scrollbar-thumb {
   background: var(--neutral-grey);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 
 .popup-gallery-grid::-webkit-scrollbar-thumb:hover {
@@ -244,7 +244,7 @@
   background: var(--surface);
   color: var(--primary);
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   font-size: 10px;
   font-weight: 600;
 }
@@ -280,14 +280,14 @@
 
 .popup-detail-content::-webkit-scrollbar-thumb {
   background: var(--neutral-grey);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 
 .popup-back-button {
   padding: var(--spacing-sm) var(--spacing-lg);
   background: var(--surface);
   border: 2px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
@@ -384,6 +384,10 @@
   border: 1px solid var(--border-light);
 }
 
+.popup-fit-card img {
+  cursor: pointer;
+}
+
 .popup-fit-card:hover {
   transform: scale(1.02);
   box-shadow: var(--shadow-lg);
@@ -396,6 +400,7 @@
   object-fit: contain;
   display: block;
   background-color: var(--neutral-light);
+  cursor: pointer;
 }
 
 .popup-fit-main-badge {
@@ -545,7 +550,7 @@
   background: var(--primary);
   color: var(--surface);
   text-decoration: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 600;
   transition: all 0.2s ease;
@@ -556,4 +561,139 @@
   background: var(--primary-dark);
   transform: translateY(-2px);
   box-shadow: var(--shadow-primary-hover);
+}
+
+/* Image Modal Styles */
+.popup-image-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay-black-90);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.popup-image-modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-image-modal-image-wrapper {
+  width: 80vw;
+  max-width: 1200px;
+  height: 80vh;
+  max-height: 800px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.popup-image-modal-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: var(--surface);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+}
+
+.popup-image-modal-close:hover {
+  background: var(--primary);
+  color: var(--surface);
+  transform: scale(1.1);
+}
+
+.popup-image-modal-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.popup-image-modal-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  background-color: var(--overlay-black-60);
+  color: var(--text-on-dark);
+  border: none;
+  border-radius: 50%;
+  font-size: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.popup-image-modal-arrow:hover {
+  background-color: var(--overlay-black-80);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.popup-image-modal-prev {
+  left: 20px;
+}
+
+.popup-image-modal-next {
+  right: 20px;
+}
+
+.popup-image-modal-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.popup-image-modal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--border-light);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.popup-image-modal-dot:hover {
+  background-color: var(--neutral-grey);
+}
+
+.popup-image-modal-dot.active {
+  background-color: var(--primary);
+  transform: scale(1.2);
 }

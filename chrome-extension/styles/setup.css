@@ -5,7 +5,7 @@
   padding: 24px;
   max-width: 400px;
   min-width: 350px;
-  background-color: white;
+  background-color: var(--surface);
   border-radius: 15px;
   display: block;
   box-sizing: border-box;
@@ -83,12 +83,12 @@
 /* Dropzone Styles */
 .dropzone {
   border: 2px dashed #d0d0d0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 48px 24px;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.2s ease;
-  background-color: white;
+  background-color: var(--surface);
   min-height: 160px;
   display: flex;
   align-items: center;
@@ -108,7 +108,7 @@
 .dropzone-has-image {
   padding: 8px;
   border: 2px solid #ddd;
-  background-color: white;
+  background-color: var(--surface);
   cursor: pointer;
 }
 
@@ -192,7 +192,7 @@
 .preview-image {
   max-width: 100%;
   max-height: 300px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   object-fit: cover;
   display: block;
 }
@@ -207,7 +207,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   transition: background-color 0.3s ease;
   pointer-events: none;
   box-sizing: border-box;
@@ -218,7 +218,7 @@
 }
 
 .preview-change-text {
-  color: white;
+  color: var(--surface);
   font-size: 16px;
   font-weight: 500;
   opacity: 0;
@@ -238,7 +238,7 @@
   box-sizing: border-box;
   padding: 12px 16px;
   border: 2px solid var(--border-light);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   color: var(--text-primary);
   background-color: var(--surface);
@@ -273,10 +273,10 @@
 /* Button Styles */
 .setup-button {
   padding: 14px 24px;
-  background-color: var(--accent);
-  color: white;
+  background-color: var(--primary);
+  color: var(--surface);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
@@ -289,9 +289,9 @@
 }
 
 .setup-button:hover {
-  background-color: var(--accent-dark);
+  background-color: var(--primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-primary);
 }
 
 .setup-button:active {
@@ -308,7 +308,7 @@
   padding: 12px;
   background-color: #fee;
   border: 1px solid #fcc;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: #c33;
   font-size: 13px;
   text-align: center;

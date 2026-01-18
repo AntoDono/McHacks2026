@@ -103,9 +103,9 @@
   --font-text: 'CreatoDisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Primary Colors */
-  --primary: #047C58; /* Deep Teal */
-  --primary-light: #059a6f;
-  --primary-dark: #035d44;
+  --primary: #8C886B; /* Muted Olive */
+  --primary-light: #a5a189;
+  --primary-dark: #736f56;
   
   /* Secondary Colors */
   --secondary: #8C886B; /* Muted Olive */
@@ -154,9 +154,9 @@
   --shadow-md: 0 4px 12px rgba(30, 23, 2, 0.12);
   --shadow-lg: 0 4px 20px rgba(30, 23, 2, 0.15);
   --shadow-xl: 0 8px 32px rgba(30, 23, 2, 0.3);
-  --shadow-primary: 0 4px 8px rgba(4, 124, 88, 0.2);
-  --shadow-primary-hover: 0 4px 16px rgba(4, 124, 88, 0.4);
-  --shadow-primary-sm: 0 2px 8px rgba(4, 124, 88, 0.3);
+  --shadow-primary: 0 4px 8px rgba(140, 136, 107, 0.2);
+  --shadow-primary-hover: 0 4px 16px rgba(140, 136, 107, 0.4);
+  --shadow-primary-sm: 0 2px 8px rgba(140, 136, 107, 0.3);
 
   /* Overlay/Backdrop Colors */
   --overlay-dark: rgba(30, 23, 2, 0.6);
@@ -181,9 +181,9 @@
 #plasmo-image-overlay-root {
   --font-title: 'Megant', Georgia, serif !important;
   --font-text: 'CreatoDisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  --primary: #047C58 !important;
-  --primary-light: #059a6f !important;
-  --primary-dark: #035d44 !important;
+  --primary: #8C886B !important;
+  --primary-light: #a5a189 !important;
+  --primary-dark: #736f56 !important;
   --secondary: #8C886B !important;
   --secondary-light: #a5a189 !important;
   --secondary-dark: #736f56 !important;

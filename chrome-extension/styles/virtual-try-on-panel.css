@@ -140,9 +140,10 @@
   all: initial !important;
   max-width: 100% !important;
   max-height: 300px !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
   object-fit: contain !important;
   display: block !important;
+  cursor: pointer !important;
 }
 
 #plasmo-image-overlay-root .virtual-try-on-no-photo {
@@ -173,7 +174,7 @@
   position: relative !important;
   aspect-ratio: 1 !important;
   overflow: visible !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
   border: 2px solid var(--border-light) !important;
   background-color: var(--neutral-light) !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
@@ -186,7 +187,7 @@
   width: 100% !important;
   height: 100% !important;
   overflow: hidden !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
   position: relative !important;
   z-index: 0 !important;
   display: block !important;
@@ -205,6 +206,7 @@
   height: 100% !important;
   object-fit: cover !important;
   display: block !important;
+  cursor: pointer !important;
 }
 
 #plasmo-image-overlay-root .virtual-try-on-remove-button {
@@ -400,7 +402,7 @@
   background-color: var(--primary) !important;
   color: var(--surface) !important;
   border: none !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-md) !important;
   font-size: 16px !important;
   font-weight: 500 !important;
   cursor: pointer !important;
@@ -419,4 +421,163 @@
 
 #plasmo-image-overlay-root .virtual-try-on-start-button:active {
   transform: translateY(0) !important;
+}
+
+/* Image Modal Styles */
+#plasmo-image-overlay-root .virtual-try-on-image-modal-overlay {
+  all: initial !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: var(--overlay-black-90) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2147483648 !important;
+  padding: 20px !important;
+  backdrop-filter: blur(4px) !important;
+  pointer-events: auto !important;
+  box-sizing: border-box !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-content {
+  all: initial !important;
+  position: relative !important;
+  max-width: 90vw !important;
+  max-height: 90vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-image-wrapper {
+  all: initial !important;
+  width: 80vw !important;
+  max-width: 1200px !important;
+  height: 80vh !important;
+  max-height: 800px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: var(--surface) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+  padding: 40px !important;
+  box-sizing: border-box !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-close {
+  all: initial !important;
+  position: absolute !important;
+  top: -40px !important;
+  right: 0 !important;
+  background-color: var(--surface) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  font-size: 24px !important;
+  color: var(--text-primary) !important;
+  transition: all 0.2s ease !important;
+  z-index: 10 !important;
+  box-shadow: var(--shadow-md) !important;
+  box-sizing: border-box !important;
+  font-family: var(--font-text) !important;
+  pointer-events: auto !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-close:hover {
+  background-color: var(--primary) !important;
+  color: var(--surface) !important;
+  transform: scale(1.1) !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-image {
+  all: initial !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-arrow {
+  all: initial !important;
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 50px !important;
+  height: 50px !important;
+  background-color: var(--overlay-black-60) !important;
+  color: var(--text-on-dark) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  font-size: 32px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10 !important;
+  transition: all 0.2s ease !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+  font-family: var(--font-text) !important;
+  pointer-events: auto !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-arrow:hover {
+  background-color: var(--overlay-black-80) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-prev {
+  left: 20px !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-next {
+  right: 20px !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-dots {
+  all: initial !important;
+  display: flex !important;
+  gap: 8px !important;
+  justify-content: center !important;
+  margin-top: 20px !important;
+  box-sizing: border-box !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-dot {
+  all: initial !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background-color: var(--border-light) !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  transition: all 0.2s ease !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-dot:hover {
+  background-color: var(--neutral-grey) !important;
+}
+
+#plasmo-image-overlay-root .virtual-try-on-image-modal-dot.active {
+  background-color: var(--primary) !important;
+  transform: scale(1.2) !important;
 }

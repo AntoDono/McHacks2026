@@ -42,6 +42,9 @@ function IndexPopup() {
   const [selectedSession, setSelectedSession] = useState<SessionDetail | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [selectedGarment, setSelectedGarment] = useState<SessionDetail['garments'][0] | null>(null)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0)
+  const [selectedImageGallery, setSelectedImageGallery] = useState<string[]>([])
 
   // Check if user is setup on load
   useEffect(() => {
@@ -102,6 +105,63 @@ function IndexPopup() {
 
   const handleGarmentClick = (garment: SessionDetail['garments'][0]) => {
     setSelectedGarment(garment)
+  }
+
+  // Handle opening image modal with context
+  const handleImageClick = (imageUrl: string, gallery: string[], index: number) => {
+    setSelectedImage(imageUrl)
+    setSelectedImageGallery(gallery)
+    setSelectedImageIndex(index)
+  }
+
+  // Handle arrow key navigation in modal
+  useEffect(() => {
+    if (!selectedImage) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        const prevIndex = selectedImageIndex === 0 
+          ? selectedImageGallery.length - 1 
+          : selectedImageIndex - 1
+        setSelectedImageIndex(prevIndex)
+        setSelectedImage(selectedImageGallery[prevIndex])
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        const nextIndex = selectedImageIndex === selectedImageGallery.length - 1 
+          ? 0 
+          : selectedImageIndex + 1
+        setSelectedImageIndex(nextIndex)
+        setSelectedImage(selectedImageGallery[nextIndex])
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        setSelectedImage(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedImage, selectedImageIndex, selectedImageGallery])
+
+  const handleModalPrev = () => {
+    const prevIndex = selectedImageIndex === 0 
+      ? selectedImageGallery.length - 1 
+      : selectedImageIndex - 1
+    setSelectedImageIndex(prevIndex)
+    setSelectedImage(selectedImageGallery[prevIndex])
+  }
+
+  const handleModalNext = () => {
+    const nextIndex = selectedImageIndex === selectedImageGallery.length - 1 
+      ? 0 
+      : selectedImageIndex + 1
+    setSelectedImageIndex(nextIndex)
+    setSelectedImage(selectedImageGallery[nextIndex])
+  }
+
+  const handleThumbnailClick = (index: number) => {
+    setSelectedImageIndex(index)
+    setSelectedImage(selectedImageGallery[index])
   }
 
   const handleCloseGarmentModal = () => {
@@ -199,7 +259,15 @@ function IndexPopup() {
                 </h3>
                 <div className="popup-fits-grid">
                   {selectedSession.generated_images.map((fit, idx) => (
-                    <div key={idx} className="popup-fit-card">
+                    <div 
+                      key={idx} 
+                      className="popup-fit-card"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        const fitImages = selectedSession.generated_images.map(f => f.image)
+                        handleImageClick(fit.image, fitImages, idx)
+                      }}
+                    >
                       <img
                         src={fit.image}
                         alt={`Fit ${idx + 1}`}
@@ -278,6 +346,67 @@ function IndexPopup() {
             </div>
           </div>
         )}
+
+        {/* Image Modal - Only shown in detail view */}
+        {selectedImage && selectedImageGallery.length > 0 && (
+          <div 
+            className="popup-image-modal-overlay"
+            onClick={() => setSelectedImage(null)}
+          >
+            <div 
+              className="popup-image-modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="popup-image-modal-close"
+                onClick={() => setSelectedImage(null)}
+                aria-label="Close image"
+              >
+                ×
+              </button>
+              
+              {selectedImageGallery.length > 1 && (
+                <>
+                  <button
+                    className="popup-image-modal-arrow popup-image-modal-prev"
+                    onClick={handleModalPrev}
+                    aria-label="Previous image"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    className="popup-image-modal-arrow popup-image-modal-next"
+                    onClick={handleModalNext}
+                    aria-label="Next image"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+              
+              <div className="popup-image-modal-image-wrapper">
+                <img
+                  src={selectedImage}
+                  alt={`Image ${selectedImageIndex + 1} of ${selectedImageGallery.length}`}
+                  className="popup-image-modal-image"
+                />
+              </div>
+              
+              {selectedImageGallery.length > 1 && (
+                <div className="popup-image-modal-dots">
+                  {selectedImageGallery.map((_, idx) => (
+                    <button
+                      key={idx}
+                      className={`popup-image-modal-dot ${idx === selectedImageIndex ? 'active' : ''}`}
+                      onClick={() => handleThumbnailClick(idx)}
+                      aria-label={`View image ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -320,7 +449,7 @@ function IndexPopup() {
       <div className="popup-gallery-section">
         <div className="popup-gallery-header-row">
           <h3 className="popup-gallery-header">
-            Previously Tried Fits ✨
+            Previously Tried Fits
           </h3>
           {!loadingSessions && sessions.length > 0 && (
             <span className="popup-gallery-count">{sessions.length}</span>
