@@ -4,15 +4,40 @@ import asyncio
 import tempfile
 import os
 import uuid
+from io import BytesIO
+
+try:
+    from rembg import remove
+except ImportError:
+    print("Warning: rembg not available. Generated views will keep their backgrounds.")
+    remove = None
 
 client = genai.Client()
 
 prompts = {
-    0: "Make this person face the front",
-    90: "Make this person face the left side",
-    180: "Make this person face the back",
-    270: "Make this person face the right side",
+    0: "Make this person face the front. Keep the background transparent or white.",
+    90: "Make this person face the left side. Keep the background transparent or white.",
+    180: "Make this person face the back. Keep the background transparent or white.",
+    270: "Make this person face the right side. Keep the background transparent or white.",
 }
+
+
+def _remove_background(image: Image.Image) -> Image.Image:
+    """Remove background from image using rembg"""
+    if remove is None:
+        return image
+    
+    # Convert PIL Image to bytes
+    img_byte_arr = BytesIO()
+    image.save(img_byte_arr, 'PNG')
+    img_byte_arr.seek(0)
+    input_data = img_byte_arr.read()
+    
+    # Remove background
+    output_data = remove(input_data)
+    
+    # Convert back to PIL Image
+    return Image.open(BytesIO(output_data)).convert("RGBA")
 
 
 async def _generate_view(angle, prompt, image, output_dir):
@@ -26,15 +51,41 @@ async def _generate_view(angle, prompt, image, output_dir):
         )
         return response
     
-    try:
-        response = await loop.run_in_executor(None, _generate)
-        
+    def _process_background(response):
+        # This will run in thread pool
         for part in response.parts:
             if part.inline_data is not None:
                 generated_image = part.as_image()
-                filename = os.path.join(output_dir, f"{angle}.png")
-                generated_image.save(filename)
-                return filename
+                
+                # Convert Google Image to PIL Image
+                # Google genai Image objects need to be converted to PIL Images
+                if hasattr(generated_image, '_pil_image'):
+                    # If it has a _pil_image attribute, use it
+                    generated_image = generated_image._pil_image
+                elif not isinstance(generated_image, Image.Image):
+                    # Otherwise convert via bytes
+                    temp_buf = BytesIO()
+                    # Google Image.save() doesn't take format argument
+                    generated_image.save(temp_buf)
+                    temp_buf.seek(0)
+                    generated_image = Image.open(temp_buf)
+                
+                # Remove background if rembg is available
+                if remove is not None:
+                    print(f"  Removing background from {angle}° view...")
+                    generated_image = _remove_background(generated_image)
+                
+                return generated_image
+        return None
+    
+    try:
+        response = await loop.run_in_executor(None, _generate)
+        generated_image = await loop.run_in_executor(None, _process_background, response)
+        
+        if generated_image:
+            filename = os.path.join(output_dir, f"{angle}.png")
+            generated_image.save(filename, "PNG")
+            return filename
         
         return None
         

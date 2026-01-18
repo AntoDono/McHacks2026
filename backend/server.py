@@ -272,9 +272,35 @@ def try_on():
             # Fallback to just the original image
             view_paths = [str(output_path)]
 
+        # Crop each generated view to fit the person properly
+        cropped_view_paths = []
+        for i, view_path in enumerate(view_paths):
+            if os.path.exists(view_path):
+                try:
+                    # Create cropped output path
+                    view_file = Path(view_path)
+                    cropped_view_path = view_file.parent / f"{timestamp}_view_{i}_cropped{view_file.suffix}"
+                    
+                    print(f"  Cropping view {i}: {view_path}")
+                    actual_cropped_path = process_selfie(
+                        str(view_path),
+                        str(cropped_view_path),
+                        padding=20,
+                        max_size=1000
+                    )
+                    cropped_view_paths.append(actual_cropped_path)
+                    
+                    # Clean up uncropped view
+                    Path(view_path).unlink()
+                    
+                except Exception as crop_error:
+                    print(f"  Warning: Failed to crop view {i}: {crop_error}")
+                    # Use uncropped if cropping fails
+                    cropped_view_paths.append(view_path)
+        
         # Read all images and convert to base64
         images_base64 = []
-        for view_path in view_paths:
+        for view_path in cropped_view_paths:
             if os.path.exists(view_path):
                 with open(view_path, "rb") as img_file:
                     img_data = base64.b64encode(img_file.read()).decode("utf-8")
@@ -284,7 +310,7 @@ def try_on():
                 images_base64.append(f"data:{mime_type};base64,{img_data}")
         
         # Also include the original cropped image as the first one if not already included
-        if str(output_path) not in view_paths:
+        if str(output_path) not in cropped_view_paths:
             with open(output_path, "rb") as img_file:
                 img_data = base64.b64encode(img_file.read()).decode("utf-8")
             mime_type = "image/png" if output_path.suffix.lower() == ".png" else "image/jpeg"
