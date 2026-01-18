@@ -15,66 +15,66 @@
   font-display: swap;
 }
 
-/* Quiet Luxury Color Scheme */
-:root {
+/* Quiet Luxury Color Scheme - Scoped to extension only */
+#plasmo-image-overlay-root {
   /* Font Families */
-  --font-title: 'Megant', Georgia, serif;
-  --font-text: 'CreatoDisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-title: 'Megant', Georgia, serif !important;
+  --font-text: 'CreatoDisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 
   /* Primary Colors */
-  --primary: #988876; /* Roasted Cashew */
-  --primary-light: #a89886;
-  --primary-dark: #857766;
+  --primary: #988876 !important; /* Roasted Cashew */
+  --primary-light: #a89886 !important;
+  --primary-dark: #857766 !important;
   
   /* Secondary Colors */
-  --secondary: #E8DCC4; /* Frozen Dew */
-  --secondary-light: #f0e8d4;
-  --secondary-dark: #d8ccb4;
+  --secondary: #E8DCC4 !important; /* Frozen Dew */
+  --secondary-light: #f0e8d4 !important;
+  --secondary-dark: #d8ccb4 !important;
   
   /* Accent Colors */
-  --accent: #54534F; /* Dark Night */
-  --accent-light: #64635f;
-  --accent-dark: #44433f;
+  --accent: #54534F !important; /* Dark Night */
+  --accent-light: #64635f !important;
+  --accent-dark: #44433f !important;
   
   /* Neutral Colors */
-  --neutral-grey: #C7C1BE; /* Temple Grey */
-  --neutral-light: #EFEAE5; /* Snowfall */
-  --neutral-dark: #54534F;
+  --neutral-grey: #C7C1BE !important; /* Temple Grey */
+  --neutral-light: #EFEAE5 !important; /* Snowfall */
+  --neutral-dark: #54534F !important;
   
   /* Semantic Colors */
-  --background: #EFEAE5; /* Snowfall */
-  --surface: #FFFFFF;
-  --text-primary: #54534F; /* Dark Night */
-  --text-secondary: #988876; /* Roasted Cashew */
-  --text-light: #C7C1BE; /* Temple Grey */
+  --background: #EFEAE5 !important; /* Snowfall */
+  --surface: #FFFFFF !important;
+  --text-primary: #54534F !important; /* Dark Night */
+  --text-secondary: #988876 !important; /* Roasted Cashew */
+  --text-light: #C7C1BE !important; /* Temple Grey */
   
   /* Border Colors */
-  --border: #C7C1BE;
-  --border-light: #E8DCC4;
-  --border-dark: #54534F;
+  --border: #C7C1BE !important;
+  --border-light: #E8DCC4 !important;
+  --border-dark: #54534F !important;
 }
 
-/* Base Typography */
-* {
-  box-sizing: border-box;
+/* Base Typography - Scoped to extension only */
+#plasmo-image-overlay-root * {
+  box-sizing: border-box !important;
 }
 
-body, p, span, div, input, button, textarea {
-  font-family: var(--font-text);
+#plasmo-image-overlay-root body,
+#plasmo-image-overlay-root p,
+#plasmo-image-overlay-root span,
+#plasmo-image-overlay-root div,
+#plasmo-image-overlay-root input,
+#plasmo-image-overlay-root button,
+#plasmo-image-overlay-root textarea {
+  font-family: var(--font-text) !important;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-title);
-  font-weight: normal;
-}
-
-/* Optional: Dark mode variants */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #54534F;
-    --surface: #44433f;
-    --text-primary: #EFEAE5;
-    --text-secondary: #E8DCC4;
-    --text-light: #C7C1BE;
-  }
+#plasmo-image-overlay-root h1,
+#plasmo-image-overlay-root h2,
+#plasmo-image-overlay-root h3,
+#plasmo-image-overlay-root h4,
+#plasmo-image-overlay-root h5,
+#plasmo-image-overlay-root h6 {
+  font-family: var(--font-title) !important;
+  font-weight: normal !important;
 }

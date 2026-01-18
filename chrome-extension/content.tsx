@@ -22,7 +22,7 @@ export const getRootContainer: PlasmoGetRootContainer = () => {
   const container = document.createElement("div")
   container.id = "plasmo-image-overlay-root"
   container.style.cssText =
-    "all: initial; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999998; pointer-events: none;"
+    "all: initial; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2147483647 !important; pointer-events: none;"
   document.body.appendChild(container)
   return container
 }

@@ -1,242 +1,296 @@
 @import './globals.css';
 
-.setup-container {
-  padding: 24px;
-  max-width: 400px;
-  min-width: 350px;
-  background-color: white;
-  border-radius: 15px;
+/* All setup styles scoped to extension root */
+#plasmo-image-overlay-root .setup-container {
+  all: initial !important;
+  padding: 24px !important;
+  max-width: 400px !important;
+  min-width: 350px !important;
+  background-color: white !important;
+  border-radius: 15px !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-.setup-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #999;
-  cursor: pointer;
-  line-height: 1;
-  padding: 4px 8px;
-  transition: color 0.2s ease;
-  z-index: 10;
+#plasmo-image-overlay-root .setup-close {
+  all: initial !important;
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  background: none !important;
+  border: none !important;
+  font-size: 24px !important;
+  color: #999 !important;
+  cursor: pointer !important;
+  line-height: 1 !important;
+  padding: 4px 8px !important;
+  transition: color 0.2s ease !important;
+  z-index: 10 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-.setup-close:hover {
-  color: #333;
+#plasmo-image-overlay-root .setup-close:hover {
+  color: #333 !important;
 }
 
-.setup-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: #000;
-  margin: 0 0 8px 0;
-  text-align: center;
+#plasmo-image-overlay-root .setup-title {
+  all: initial !important;
+  font-size: 28px !important;
+  font-weight: 600 !important;
+  color: #000 !important;
+  margin: 0 0 8px 0 !important;
+  text-align: center !important;
+  display: block !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-.setup-subtitle {
-  font-size: 14px;
-  color: #666;
-  margin: 0 0 24px 0;
-  text-align: center;
+#plasmo-image-overlay-root .setup-subtitle {
+  all: initial !important;
+  font-size: 14px !important;
+  color: #666 !important;
+  margin: 0 0 24px 0 !important;
+  text-align: center !important;
+  display: block !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-.setup-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+#plasmo-image-overlay-root .setup-form {
+  all: initial !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 24px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-.setup-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+#plasmo-image-overlay-root .setup-section {
+  all: initial !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-.section-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #000;
-  margin: 0;
+#plasmo-image-overlay-root .section-title {
+  all: initial !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #000 !important;
+  margin: 0 !important;
+  display: block !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 /* Dropzone Styles */
-.dropzone {
-  border: 2px dashed #ddd;
-  border-radius: 12px;
-  padding: 32px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background-color: #fafafa;
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+#plasmo-image-overlay-root .dropzone {
+  all: initial !important;
+  border: 2px dashed #ddd !important;
+  border-radius: 12px !important;
+  padding: 32px !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  background-color: #fafafa !important;
+  min-height: 200px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-.dropzone:hover {
-  border-color: #999;
-  background-color: #f5f5f5;
+#plasmo-image-overlay-root .dropzone:hover {
+  border-color: #999 !important;
+  background-color: #f5f5f5 !important;
 }
 
-.dropzone-active {
-  border-color: var(--primary);
-  background-color: #f8f8f8;
-  transform: scale(1.02);
+#plasmo-image-overlay-root .dropzone-active {
+  border-color: var(--primary) !important;
+  background-color: #f8f8f8 !important;
+  transform: scale(1.02) !important;
 }
 
-.dropzone-has-image {
-  padding: 8px;
-  border: 2px solid #ddd;
-  background-color: white;
-  cursor: pointer;
+#plasmo-image-overlay-root .dropzone-has-image {
+  padding: 8px !important;
+  border: 2px solid #ddd !important;
+  background-color: white !important;
+  cursor: pointer !important;
 }
 
-.dropzone-has-image:hover {
-  border-color: var(--primary);
+#plasmo-image-overlay-root .dropzone-has-image:hover {
+  border-color: var(--primary) !important;
 }
 
-.dropzone-processing {
-  border-color: var(--primary);
-  background-color: #f8f8f8;
-  cursor: wait;
-  opacity: 0.8;
+#plasmo-image-overlay-root .dropzone-processing {
+  border-color: var(--primary) !important;
+  background-color: #f8f8f8 !important;
+  cursor: wait !important;
+  opacity: 0.8 !important;
 }
 
-.dropzone-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+#plasmo-image-overlay-root .dropzone-content {
+  all: initial !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-.dropzone-icon {
-  font-size: 48px;
+#plasmo-image-overlay-root .dropzone-icon {
+  all: initial !important;
+  font-size: 48px !important;
+  display: block !important;
 }
 
-.dropzone-text {
-  font-size: 14px;
-  color: #666;
-  margin: 0;
-  line-height: 1.5;
+#plasmo-image-overlay-root .dropzone-text {
+  all: initial !important;
+  font-size: 14px !important;
+  color: #666 !important;
+  margin: 0 !important;
+  line-height: 1.5 !important;
+  display: block !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-.preview-container {
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#plasmo-image-overlay-root .preview-container {
+  all: initial !important;
+  position: relative !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
 }
 
-.preview-image {
-  max-width: 100%;
-  max-height: 300px;
-  border-radius: 8px;
-  object-fit: cover;
-  display: block;
+#plasmo-image-overlay-root .preview-image {
+  all: initial !important;
+  max-width: 100% !important;
+  max-height: 300px !important;
+  border-radius: 8px !important;
+  object-fit: cover !important;
+  display: block !important;
 }
 
-.preview-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-  pointer-events: none;
+#plasmo-image-overlay-root .preview-overlay {
+  all: initial !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: rgba(0, 0, 0, 0) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  transition: background-color 0.3s ease !important;
+  pointer-events: none !important;
+  box-sizing: border-box !important;
 }
 
-.dropzone-has-image:hover .preview-overlay {
-  background-color: rgba(0, 0, 0, 0.5);
+#plasmo-image-overlay-root .dropzone-has-image:hover .preview-overlay {
+  background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
-.preview-change-text {
-  color: white;
-  font-size: 16px;
-  font-weight: 500;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  margin: 0;
+#plasmo-image-overlay-root .preview-change-text {
+  all: initial !important;
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease !important;
+  margin: 0 !important;
+  display: block !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-.dropzone-has-image:hover .preview-change-text {
-  opacity: 1;
+#plasmo-image-overlay-root .dropzone-has-image:hover .preview-change-text {
+  opacity: 1 !important;
 }
 
 /* Input Styles */
-.setup-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 12px 16px;
-  border: 2px solid var(--border-light);
-  border-radius: 8px;
-  font-size: 14px;
-  color: var(--text-primary);
-  background-color: var(--surface);
-  transition: all 0.2s ease;
-  outline: none;
+#plasmo-image-overlay-root .setup-input {
+  all: initial !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 12px 16px !important;
+  border: 2px solid var(--border-light) !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  color: var(--text-primary) !important;
+  background-color: var(--surface) !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+  display: block !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-.setup-input:focus {
-  border-color: var(--primary);
-  background-color: var(--surface);
+#plasmo-image-overlay-root .setup-input:focus {
+  border-color: var(--primary) !important;
+  background-color: var(--surface) !important;
 }
 
-.setup-input::placeholder {
-  color: var(--text-light);
+#plasmo-image-overlay-root .setup-input::placeholder {
+  color: var(--text-light) !important;
 }
 
 /* Fix autofill styles */
-.setup-input:-webkit-autofill,
-.setup-input:-webkit-autofill:hover,
-.setup-input:-webkit-autofill:focus {
+#plasmo-image-overlay-root .setup-input:-webkit-autofill,
+#plasmo-image-overlay-root .setup-input:-webkit-autofill:hover,
+#plasmo-image-overlay-root .setup-input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 30px var(--surface) inset !important;
   -webkit-text-fill-color: var(--text-primary) !important;
   border-color: var(--border-light) !important;
 }
 
-.setup-input:-webkit-autofill:focus {
+#plasmo-image-overlay-root .setup-input:-webkit-autofill:focus {
   border-color: var(--primary) !important;
 }
 
 /* Button Styles */
-.setup-button {
-  padding: 14px 24px;
-  background-color: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+#plasmo-image-overlay-root .setup-button {
+  all: initial !important;
+  padding: 14px 24px !important;
+  background-color: var(--accent) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
-.setup-button:hover {
-  background-color: var(--accent-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+#plasmo-image-overlay-root .setup-button:hover {
+  background-color: var(--accent-dark) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
-.setup-button:active {
-  transform: translateY(0);
+#plasmo-image-overlay-root .setup-button:active {
+  transform: translateY(0) !important;
 }
 
 /* Error Message */
-.error-message {
-  padding: 12px;
-  background-color: #fee;
-  border: 1px solid #fcc;
-  border-radius: 8px;
-  color: #c33;
-  font-size: 13px;
-  text-align: center;
+#plasmo-image-overlay-root .error-message {
+  all: initial !important;
+  padding: 12px !important;
+  background-color: #fee !important;
+  border: 1px solid #fcc !important;
+  border-radius: 8px !important;
+  color: #c33 !important;
+  font-size: 13px !important;
+  text-align: center !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
