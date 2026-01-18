@@ -222,3 +222,39 @@
 .cart-items::-webkit-scrollbar-thumb:hover {
   background: var(--text-light);
 }
+
+/* Progress indicator styles */
+.cart-progress-container {
+  padding: 12px;
+  text-align: center;
+}
+
+.cart-progress-message {
+  font-size: 15px;
+  font-weight: 600;
+  color: black;
+  margin-bottom: 12px;
+  min-height: 22px;
+}
+
+.cart-progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.cart-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.cart-progress-percent {
+  font-size: 13px;
+  font-weight: 600;
+  color: #667eea;
+}

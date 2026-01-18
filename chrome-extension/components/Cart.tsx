@@ -8,9 +8,10 @@ interface CartProps {
   onTryItOn: () => void
   onClose: () => void
   isLoading?: boolean
+  progress?: { message: string; progress: number }
 }
 
-const Cart = ({ items, onRemoveItem, onTryItOn, onClose, isLoading = false }: CartProps) => {
+const Cart = ({ items, onRemoveItem, onTryItOn, onClose, isLoading = false, progress }: CartProps) => {
   const [isMinimized, setIsMinimized] = useState(false)
 
   return (
@@ -69,20 +70,33 @@ const Cart = ({ items, onRemoveItem, onTryItOn, onClose, isLoading = false }: Ca
 
           {items.length > 0 && (
             <div className="cart-footer">
-              <button
-                className="cart-try-on-btn"
-                onClick={onTryItOn}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <span className="cart-spinner"></span>
-                    Generating...
-                  </>
-                ) : (
-                  `Try it on (${items.length})`
-                )}
-              </button>
+              {isLoading && progress && progress.progress > 0 ? (
+                <div className="cart-progress-container">
+                  <div className="cart-progress-message">{progress.message}</div>
+                  <div className="cart-progress-bar-bg">
+                    <div 
+                      className="cart-progress-bar-fill" 
+                      style={{ width: `${progress.progress}%` }}
+                    />
+                  </div>
+                  <div className="cart-progress-percent">{progress.progress}%</div>
+                </div>
+              ) : (
+                <button
+                  className="cart-try-on-btn"
+                  onClick={onTryItOn}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="cart-spinner"></span>
+                      Starting...
+                    </>
+                  ) : (
+                    `Try it on (${items.length})`
+                  )}
+                </button>
+              )}
             </div>
           )}
         </>

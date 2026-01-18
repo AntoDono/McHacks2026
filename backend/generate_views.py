@@ -11,7 +11,7 @@ from io import BytesIO
 # ============================================================================
 # CONFIGURATION: Choose generation method
 # ============================================================================
-USE_GUMLOOP = True  # Set to True to use Gumloop API instead of Gemini
+USE_GUMLOOP = False  # Set to True to use Gumloop API instead of Gemini
 # ============================================================================
 
 try:

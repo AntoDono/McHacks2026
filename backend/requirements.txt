@@ -9,3 +9,4 @@ peewee
 numpy
 cloudinary
 gumloop
+gumloop
