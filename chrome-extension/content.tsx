@@ -79,27 +79,68 @@ const ContentScript = () => {
   }
 
   // Helper function to get the actual image URL from an image element
+  // Prioritizes the actual src attribute that's currently being displayed
   const getImageUrl = (img: HTMLImageElement): string | null => {
-    // Check for lazy-load attributes first
+    // First, check the current src attribute (what's actually displayed)
+    // This handles cases where lazy-loading has already loaded the image
+    if (img.src && img.src !== 'data:,' && !img.src.startsWith('data:,') && !img.src.startsWith('blob:')) {
+      // If src is a full URL (not a placeholder), use it
+      try {
+        const url = new URL(img.src, window.location.href)
+        // Only use if it's a valid HTTP/HTTPS URL
+        if (url.protocol === 'http:' || url.protocol === 'https:') {
+          return img.src
+        }
+      } catch {
+        // If URL parsing fails, continue to check other sources
+      }
+    }
+    
+    // Check for lazy-load attributes (for images not yet loaded)
     const lazySrc = img.getAttribute('data-src') || 
                     img.getAttribute('data-lazy-src') || 
                     img.getAttribute('data-original') ||
                     img.getAttribute('data-srcset')?.split(',')[0]?.trim().split(' ')[0]
     
-    if (lazySrc && lazySrc !== 'data:,' && !lazySrc.startsWith('data:,')) {
-      return lazySrc
+    if (lazySrc && lazySrc !== 'data:,' && !lazySrc.startsWith('data:,') && !lazySrc.startsWith('blob:')) {
+      // Resolve relative URLs to absolute
+      try {
+        return new URL(lazySrc, window.location.href).href
+      } catch {
+        return lazySrc
+      }
     }
     
-    // Check srcset for responsive images
+    // Check srcset for responsive images (get the largest/highest quality)
     if (img.srcset) {
-      const srcsetUrls = img.srcset.split(',').map(s => s.trim().split(' ')[0])
-      const validUrl = srcsetUrls.find(url => url && !url.startsWith('data:,'))
-      if (validUrl) return validUrl
+      const srcsetEntries = img.srcset.split(',').map(s => s.trim())
+      // Sort by descriptor (get largest width or highest quality)
+      const sortedEntries = srcsetEntries
+        .map(entry => {
+          const parts = entry.split(/\s+/)
+          const url = parts[0]
+          const descriptor = parts[1] || ''
+          return { url, descriptor, width: parseInt(descriptor) || 0 }
+        })
+        .filter(entry => entry.url && !entry.url.startsWith('data:,') && !entry.url.startsWith('blob:'))
+        .sort((a, b) => b.width - a.width)
+      
+      if (sortedEntries.length > 0) {
+        try {
+          return new URL(sortedEntries[0].url, window.location.href).href
+        } catch {
+          return sortedEntries[0].url
+        }
+      }
     }
     
-    // Use src if it's valid
-    if (img.src && img.src !== 'data:,' && !img.src.startsWith('data:,')) {
-      return img.src
+    // Fallback to src attribute (even if it's a placeholder, might be the best we have)
+    if (img.src && !img.src.startsWith('blob:')) {
+      try {
+        return new URL(img.src, window.location.href).href
+      } catch {
+        return img.src
+      }
     }
     
     return null
@@ -109,90 +150,12 @@ const ContentScript = () => {
     if (!hoveredImage) return
 
     try {
-<<<<<<< HEAD
       // Get only the hovered image URL, not the entire gallery
       const imageUrl = getImageUrl(hoveredImage)
       
       if (!imageUrl) {
         console.warn("Could not extract image URL from hovered image")
         return
-=======
-      const galleryImages = getGalleryImages(hoveredImage)
-      console.log("Found gallery images:", galleryImages.length, galleryImages)
-
-      if (galleryImages.length > 0) {
-        // Extract product metadata once for the current page
-        const baseMetadata = extractProductMetadata(galleryImages[0])
-        
-        // Add all gallery images to cart with metadata AND base64
-        let updatedCart = [...cartItems]
-        let addedCount = 0
-        
-        for (const imageUrl of galleryImages) {
-          if (!updatedCart.some(item => item.imageUrl === imageUrl)) {
-            console.log(`Fetching and encoding image: ${imageUrl}`)
-            
-            // Fetch, resize, and convert to base64 immediately (while we have access)
-            let base64Data: string | null = null
-            try {
-              const response = await fetch(imageUrl)
-              const blob = await response.blob()
-              
-              // Resize image to max 500x500 to reduce payload size
-              const resizedBlob = await resizeImage(blob, 500, 500, 0.85)
-              
-              // Convert to base64
-              base64Data = await blobToBase64(resizedBlob)
-              console.log(`✓ Resized and encoded image to base64 (${Math.round(base64Data.length / 1024)}KB)`)
-            } catch (error) {
-              console.error(`Failed to fetch/resize/encode image:`, error)
-              // Continue without base64, URL will be fallback
-            }
-            
-            const cartItem: CartItem = {
-              imageUrl,
-              base64: base64Data,
-              url: baseMetadata.url,
-              title: baseMetadata.title,
-              price: baseMetadata.price,
-              sku: baseMetadata.sku,
-              brand: baseMetadata.brand
-            }
-            updatedCart.push(cartItem)
-            addedCount++
-          }
-        }
-        
-        if (addedCount > 0) {
-          await saveCartItems(updatedCart)
-          setCartItems(updatedCart)
-          setShowCart(true)
-          console.log(`Added ${addedCount} item(s) to cart with metadata and base64. Total: ${updatedCart.length}`)
-          
-          // Update badge
-          try {
-            chrome.runtime.sendMessage(
-              {
-                type: "CART_UPDATED",
-                count: updatedCart.length
-              },
-              (response) => {
-                if (chrome.runtime.lastError) {
-                  console.log("Message failed (this is normal):", chrome.runtime.lastError.message)
-                }
-              }
-            )
-          } catch (err) {
-            console.log("Could not send message (this is normal)")
-          }
-        } else {
-          console.log("All images already in cart")
-        }
-        
-        setHoveredImage(null)
-      } else {
-        console.warn("No gallery images found - only found the clicked image")
->>>>>>> 78df751f48bf39a766ff2976482523fcf38a7131
       }
 
       // Check if image is already in cart

@@ -475,8 +475,6 @@ def try_on_stream():
                     'metadata': json.dumps(metadata) if metadata else None
                 })
             
-            # Fun emoji options for garments
-            garment_emojis = ["🎽", "👕", "👔", "🧥", "👗", "🥼", "🧣", "👘", "🥻", "👚"]
             ordinal_words = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"]
             
             # Iteratively apply each garment
@@ -487,14 +485,13 @@ def try_on_stream():
                 # Progress calculation: 15% to 70% during garment application
                 progress = 15 + int((i / len(garment_paths)) * 55)
                 
-                # Generate fun message dynamically
-                emoji = garment_emojis[i % len(garment_emojis)]
+                # Generate message dynamically
                 if i < len(ordinal_words):
                     ordinal = ordinal_words[i]
                     action = "Putting on" if i == 0 else ("Adding" if i < 2 else "Layering")
-                    message = f"{emoji} {action} the {ordinal} piece..."
+                    message = f"{action} the {ordinal} piece..."
                 else:
-                    message = f"{emoji} Adding piece {i+1}..."
+                    message = f"Adding piece {i+1}..."
                 
                 yield f"data: {json.dumps({'type': 'status', 'message': message, 'progress': progress, 'garment': i+1, 'total': len(garment_paths)})}\n\n"
                 
@@ -538,7 +535,7 @@ def try_on_stream():
                     cropped_view_paths.append(actual_cropped_path)
                     Path(view_path).unlink()
             
-            yield f"data: {json.dumps({'type': 'status', 'message': '✨ Polishing your photos...', 'progress': 95})}\n\n"
+            yield f"data: {json.dumps({'type': 'status', 'message': 'Polishing your photos...', 'progress': 95})}\n\n"
             
             # Convert to base64
             images_base64 = []
@@ -606,7 +603,7 @@ def try_on_stream():
             }
             
             # Send completion event with timestamp only (no images to avoid huge payload)
-            yield f"data: {json.dumps({'type': 'complete', 'message': '🎉 All done! Looking great!', 'progress': 100, 'timestamp': timestamp, 'filename': output_filename})}\n\n"
+            yield f"data: {json.dumps({'type': 'complete', 'message': 'All done! Looking great!', 'progress': 100, 'timestamp': timestamp, 'filename': output_filename})}\n\n"
             
         except Exception as e:
             print(f"Error in try-on stream: {e}")

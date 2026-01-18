@@ -20,13 +20,27 @@ export const useImageHover = (isHoveringButton: boolean) => {
 
   useEffect(() => {
     const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.tagName !== "IMG") return
+      // Find the actual IMG element, even if hovering over a container
+      let target = e.target as HTMLElement
+      
+      // If not directly on an IMG, check if we're inside an image container
+      if (target.tagName !== "IMG") {
+        // Look for the nearest IMG element in the parent chain
+        const imgElement = target.closest("img") || target.querySelector("img")
+        if (!imgElement) return
+        target = imgElement as HTMLElement
+      }
 
       clearHideTimeout()
 
       const img = target as HTMLImageElement
-      if (img.width >= MIN_IMAGE_SIZE && img.height >= MIN_IMAGE_SIZE && isImageInGallery(img)) {
+      
+      // Check actual rendered dimensions (not just width/height attributes)
+      const rect = img.getBoundingClientRect()
+      const actualWidth = rect.width
+      const actualHeight = rect.height
+      
+      if (actualWidth >= MIN_IMAGE_SIZE && actualHeight >= MIN_IMAGE_SIZE && isImageInGallery(img)) {
         setHoveredImage(img)
       }
     }
