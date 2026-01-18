@@ -1,6 +1,2 @@
-rembg[cpu]
+google-genai
 pillow
-numpy
-flask
-flask-cors
-werkzeug
