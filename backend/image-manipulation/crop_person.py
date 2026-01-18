@@ -5,6 +5,7 @@ from pathlib import Path
 from rembg import remove
 from PIL import Image
 import numpy as np
+import os
 
 
 def remove_background(input_path: str) -> Image.Image:
@@ -45,11 +46,13 @@ def crop_to_person(img: Image.Image, padding: int = 20) -> Image.Image:
 
 def process_selfie(
     input_path: str,
-    output_path: str,
     padding: int = 20,
     max_size: int | None = None
 ) -> str:
-    """Process image: remove background, crop to person, optional resize."""
+    """Process image: remove background, crop to person, optional resize.
+    Returns path to temporary PNG file."""
+    import tempfile
+    
     print(f"Processing: {input_path}")
     
     img = remove_background(input_path)
@@ -65,18 +68,19 @@ def process_selfie(
             img = img.resize(new_size, Image.Resampling.LANCZOS)
             print(f"  Resized to: {img.size}")
     
-    output_path = Path(output_path)
-    if output_path.suffix.lower() != '.png':
-        output_path = output_path.with_suffix('.png')
+    # Always use temp file
+    fd, output_path = tempfile.mkstemp(suffix='.png', prefix='processed_')
+    os.close(fd)  # Close file descriptor, we'll write with PIL
     
     img.save(output_path, "PNG")
     print(f"  Saved to: {output_path}")
     
-    return str(output_path)
+    return output_path
 
 
 def main():
     import argparse
+    import shutil
     
     parser = argparse.ArgumentParser(description="Remove background and crop to person")
     parser.add_argument("input", help="Input image path")
@@ -85,7 +89,9 @@ def main():
     parser.add_argument("--max-size", "-s", type=int, default=None, help="Max dimension")
     
     args = parser.parse_args()
-    process_selfie(args.input, args.output, padding=args.padding, max_size=args.max_size)
+    temp_path = process_selfie(args.input, padding=args.padding, max_size=args.max_size)
+    shutil.move(temp_path, args.output)
+    print(f"Moved to: {args.output}")
 
 
 if __name__ == "__main__":

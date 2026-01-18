@@ -42,6 +42,7 @@ const ContentScript = () => {
   const [tryOnResultImages, setTryOnResultImages] = useState<string[]>([])
   const [isLoadingTryOn, setIsLoadingTryOn] = useState(false)
   const [tryOnProgress, setTryOnProgress] = useState({ message: "", progress: 0 })
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
 
   const { hoveredImage, setHoveredImage, clearHideTimeout } = useImageHover(isHoveringButton)
   const buttonPosition = useButtonPosition(hoveredImage)
@@ -258,6 +259,7 @@ const ContentScript = () => {
 
     setIsLoadingTryOn(true)
     setTryOnProgress({ message: "Starting...", progress: 0 })
+    setPreviewImage(null) // Clear any previous preview
 
     try {
       // Get API URL from environment
@@ -330,6 +332,7 @@ const ContentScript = () => {
         throw new Error("No response body")
       }
 
+      let buffer = ''
       while (true) {
         const { done, value } = await reader.read()
         
@@ -338,42 +341,58 @@ const ContentScript = () => {
         }
 
         const chunk = decoder.decode(value, { stream: true })
-        const lines = chunk.split('\n')
+        buffer += chunk
+        
+        // SSE messages are separated by double newlines
+        const messages = buffer.split('\n\n')
+        // Keep the last incomplete message in the buffer
+        buffer = messages.pop() || ''
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              
-              if (data.type === 'status') {
-                setTryOnProgress({ message: data.message, progress: data.progress })
-                console.log(`Progress: ${data.progress}% - ${data.message}`)
-              } else if (data.type === 'complete') {
-                setTryOnProgress({ message: data.message, progress: 100 })
-                console.log("✓ Try-on completed:", data.filename)
+        for (const message of messages) {
+          const lines = message.split('\n')
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6))
                 
-                // Fetch the images from the result endpoint (too large for SSE)
-                try {
-                  const resultResponse = await fetch(`${API_URL}/try-on-result/${data.timestamp}`)
-                  if (!resultResponse.ok) {
-                    throw new Error("Failed to fetch try-on results")
-                  }
-                  const resultData = await resultResponse.json()
+                if (data.type === 'status') {
+                  setTryOnProgress({ message: data.message, progress: data.progress })
+                  console.log(`Progress: ${data.progress}% - ${data.message}`)
+                } else if (data.type === 'intermediate_result') {
+                  // Show progressive preview as each garment is applied
+                  console.log(`✓ Garment ${data.garment}/${data.total} applied`)
+                  // Fetch the intermediate image
+                  const imageUrl = `${API_URL}/processed/${data.filename}`
+                  setPreviewImage(imageUrl)
+                } else if (data.type === 'complete') {
+                  setTryOnProgress({ message: data.message, progress: 100 })
+                  console.log("✓ Try-on completed:", data.filename)
                   
-                  // Use images array if available
-                  const images = resultData.images || [resultData.image]
-                  console.log(`Generated ${images.length} view(s)`)
-                  setTryOnResultImages(images)
-                  setShowVirtualTryOnPanel(true)
-                } catch (fetchError) {
-                  console.error("Error fetching result images:", fetchError)
-                  throw new Error("Failed to load result images")
+                  // Fetch the images from the result endpoint (too large for SSE)
+                  try {
+                    const resultResponse = await fetch(`${API_URL}/try-on-result/${data.timestamp}`)
+                    if (!resultResponse.ok) {
+                      throw new Error("Failed to fetch try-on results")
+                    }
+                    const resultData = await resultResponse.json()
+                    
+                    // Use images array if available
+                    const images = resultData.images || [resultData.image]
+                    console.log(`Generated ${images.length} view(s)`)
+                    setTryOnResultImages(images)
+                    setPreviewImage(null) // Clear preview since we're opening full panel
+                    // Open full panel when complete
+                    setShowVirtualTryOnPanel(true)
+                  } catch (fetchError) {
+                    console.error("Error fetching result images:", fetchError)
+                    throw new Error("Failed to load result images")
+                  }
+                } else if (data.type === 'error') {
+                  throw new Error(data.message)
                 }
-              } else if (data.type === 'error') {
-                throw new Error(data.message)
+              } catch (e) {
+                console.error("Error parsing SSE data:", e)
               }
-            } catch (e) {
-              console.error("Error parsing SSE data:", e)
             }
           }
         }
@@ -418,14 +437,26 @@ const ContentScript = () => {
       )}
 
       {showCart && (
-        <Cart
-          items={cartItems}
-          onRemoveItem={handleRemoveFromCart}
-          onTryItOn={handleTryItOn}
-          onClose={handleCloseCart}
-          isLoading={isLoadingTryOn}
-          progress={tryOnProgress}
-        />
+        <>
+          {previewImage && isLoadingTryOn && (
+            <div className="cart-preview-panel">
+              <div className="cart-preview-header">Preview</div>
+              <img 
+                src={previewImage} 
+                alt="Try-on preview" 
+                className="cart-preview-panel-image"
+              />
+            </div>
+          )}
+          <Cart
+            items={cartItems}
+            onRemoveItem={handleRemoveFromCart}
+            onTryItOn={handleTryItOn}
+            onClose={handleCloseCart}
+            isLoading={isLoadingTryOn}
+            progress={tryOnProgress}
+          />
+        </>
       )}
 
       {showVirtualTryOnPanel && (

@@ -6,6 +6,7 @@ import base64
 import sys
 import json
 import requests
+import shutil
 from pathlib import Path
 from flask import Flask, request, jsonify, send_file, Response, stream_with_context
 from flask_cors import CORS
@@ -61,14 +62,14 @@ def process_image():
     output_path = PROCESSED_FOLDER / output_filename
 
     print(f"Processing image: {input_path}")
-    actual_output_path = process_selfie(
+    temp_path = process_selfie(
         str(input_path),
-        str(output_path),
         padding=20,
         max_size=1000
     )
     
-    output_path = Path(actual_output_path)
+    # Move temp file to desired output location
+    shutil.move(temp_path, str(output_path))
     output_filename = output_path.name
 
     with open(output_path, "rb") as img_file:
@@ -270,11 +271,11 @@ def try_on():
             output = str(temp_output)
         else:
             # Last iteration - this is our final output
-            output_filename = f"{timestamp}_tryon.jpg"
+            output_filename = f"{timestamp}_tryon.png"
             output_path = PROCESSED_FOLDER / output_filename
-            actual_output_path = process_selfie(str(temp_output), str(output_path), padding=20, max_size=1000)
-            output_path = Path(actual_output_path)
-            output_filename = output_path.name
+            temp_processed = process_selfie(str(temp_output), padding=20, max_size=1000)
+            # Move temp to final location
+            shutil.move(temp_processed, str(output_path))
             temp_output.unlink()
 
     # Generate multiple views
@@ -287,10 +288,12 @@ def try_on():
     for i, view_path in enumerate(view_paths):
         if os.path.exists(view_path):
             view_file = Path(view_path)
-            cropped_view_path = view_file.parent / f"{timestamp}_view_{i}_cropped{view_file.suffix}"
+            cropped_view_path = view_file.parent / f"{timestamp}_view_{i}_cropped.png"
             
-            actual_cropped_path = process_selfie(str(view_path), str(cropped_view_path), padding=20, max_size=1000)
-            cropped_view_paths.append(actual_cropped_path)
+            temp_cropped = process_selfie(str(view_path), padding=20, max_size=1000)
+            # Move temp to final location
+            shutil.move(temp_cropped, str(cropped_view_path))
+            cropped_view_paths.append(str(cropped_view_path))
             Path(view_path).unlink()
     
     # Convert to base64
@@ -417,10 +420,14 @@ def try_on_stream():
                                 if garment_base64.startswith("data:"):
                                     garment_base64 = garment_base64.split(",", 1)[1]
                                 img_data = base64.b64decode(garment_base64)
-                                garment_path = UPLOAD_FOLDER / f"{timestamp}_garment_{i}_from_browser.jpg"
-                                with open(garment_path, "wb") as f:
+                                garment_path_raw = UPLOAD_FOLDER / f"{timestamp}_garment_{i}_from_browser_raw.jpg"
+                                with open(garment_path_raw, "wb") as f:
                                     f.write(img_data)
+                                # Process garment image (crop/resize) - returns temp path
+                                garment_temp_path = process_selfie(str(garment_path_raw), padding=20, max_size=1000)
+                                garment_path = Path(garment_temp_path)
                                 garment_paths.append(garment_path)
+                                files_to_cleanup.append(garment_path_raw)
                                 files_to_cleanup.append(garment_path)
                                 continue
                             except Exception as e:
@@ -431,9 +438,13 @@ def try_on_stream():
                                 ext = ".jpg"
                                 if "." in garment_url.split("/")[-1]:
                                     ext = "." + garment_url.split(".")[-1].split("?")[0]
-                                garment_path = UPLOAD_FOLDER / f"{timestamp}_garment_{i}_from_url{ext}"
-                                download_image_from_url(garment_url, garment_path)
+                                garment_path_raw = UPLOAD_FOLDER / f"{timestamp}_garment_{i}_from_url_raw{ext}"
+                                download_image_from_url(garment_url, garment_path_raw)
+                                # Process garment image (crop/resize) - returns temp path
+                                garment_temp_path = process_selfie(str(garment_path_raw), padding=20, max_size=1000)
+                                garment_path = Path(garment_temp_path)
                                 garment_paths.append(garment_path)
+                                files_to_cleanup.append(garment_path_raw)
                                 files_to_cleanup.append(garment_path)
                             except Exception as e:
                                 print(f"Warning: Failed to download garment {i} from URL: {str(e)}")
@@ -503,20 +514,30 @@ def try_on_stream():
                     output_mime_type="image/jpeg"
                 )
                 
-                temp_output = PROCESSED_FOLDER / f"{timestamp}_temp_iter_{i}.jpg"
-                result_image.save(str(temp_output))
+                temp_output_raw = PROCESSED_FOLDER / f"{timestamp}_temp_iter_{i}_raw.jpg"
+                result_image.save(str(temp_output_raw))
                 time.sleep(0.1)
                 
+                # Process the output (crop/resize) - get temp path
+                temp_processed = process_selfie(str(temp_output_raw), padding=20, max_size=1000)
+                temp_output_raw.unlink()  # Clean up raw file
+                
+                # Save intermediate result to PROCESSED_FOLDER for preview
+                intermediate_filename = f"{timestamp}_iter_{i}.png"
+                intermediate_path = PROCESSED_FOLDER / intermediate_filename
+                shutil.move(temp_processed, str(intermediate_path))
+                
+                # Yield intermediate result with filename (frontend will fetch it)
+                yield f"data: {json.dumps({'type': 'intermediate_result', 'filename': intermediate_filename, 'garment': i+1, 'total': len(garment_paths)})}\n\n"
+                
                 if i < len(garment_paths) - 1:
-                    temp_files_to_cleanup.append(temp_output)
-                    output = str(temp_output)
+                    temp_files_to_cleanup.append(intermediate_path)
+                    output = str(intermediate_path)
                 else:
-                    output_filename = f"{timestamp}_tryon.jpg"
+                    # Final iteration - rename intermediate to final output
+                    output_filename = f"{timestamp}_tryon.png"
                     output_path = PROCESSED_FOLDER / output_filename
-                    actual_output_path = process_selfie(str(temp_output), str(output_path), padding=20, max_size=1000)
-                    output_path = Path(actual_output_path)
-                    output_filename = output_path.name
-                    temp_output.unlink()
+                    shutil.move(str(intermediate_path), str(output_path))
             
             yield f"data: {json.dumps({'type': 'status', 'message': '📸 Taking your photos...', 'progress': 75})}\n\n"
             
@@ -530,9 +551,11 @@ def try_on_stream():
             for i, view_path in enumerate(view_paths):
                 if os.path.exists(view_path):
                     view_file = Path(view_path)
-                    cropped_view_path = view_file.parent / f"{timestamp}_view_{i}_cropped{view_file.suffix}"
-                    actual_cropped_path = process_selfie(str(view_path), str(cropped_view_path), padding=20, max_size=1000)
-                    cropped_view_paths.append(actual_cropped_path)
+                    cropped_view_path = view_file.parent / f"{timestamp}_view_{i}_cropped.png"
+                    temp_cropped = process_selfie(str(view_path), padding=20, max_size=1000)
+                    # Move temp to final location
+                    shutil.move(temp_cropped, str(cropped_view_path))
+                    cropped_view_paths.append(str(cropped_view_path))
                     Path(view_path).unlink()
             
             yield f"data: {json.dumps({'type': 'status', 'message': 'Polishing your photos...', 'progress': 95})}\n\n"

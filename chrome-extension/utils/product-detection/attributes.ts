@@ -22,39 +22,75 @@ export function extractProductMetadata(imageUrl: string): ProductMetadata {
     url: window.location.href
   }
 
-  // Try to find title
+  // Try to find title - prioritize meta tags as they're usually cleaner
   const titleSelectors = [
+    'meta[property="og:title"]',
+    'meta[name="twitter:title"]',
     'h1[class*="product"]',
     'h1[class*="title"]',
     '[class*="product-title"]',
     '[class*="productTitle"]',
     '[itemprop="name"]',
-    'meta[property="og:title"]',
-    'meta[name="twitter:title"]'
+    'h1' // Fallback to any h1
   ]
 
   for (const selector of titleSelectors) {
     const element = document.querySelector(selector)
     if (element) {
-      const title = selector.includes('meta')
+      let title = selector.includes('meta')
         ? element.getAttribute('content')
         : element.textContent?.trim()
       
-      if (title && title.length > 0) {
-        metadata.title = title
-        break
+      // Validate title:
+      // - Must be between 1-200 characters (reasonable product name length)
+      // - Should not contain excessive newlines or special chars
+      // - Should not look like full page content
+      if (title && 
+          title.length > 0 && 
+          title.length <= 200 &&
+          !title.includes('\n\n') && // No paragraph breaks
+          (title.match(/\n/g) || []).length < 3) { // Max 2 line breaks
+        
+        // Clean up: remove extra whitespace and newlines
+        title = title.replace(/\s+/g, ' ').trim()
+        
+        // Additional validation: reject if it looks like page content
+        const suspiciousPatterns = [
+          /size guide/i,
+          /add to bag/i,
+          /add to cart/i,
+          /select size/i,
+          /% off.*% off/i, // Multiple discount mentions
+          /reviews \(\d+\)/i
+        ]
+        
+        const isSuspicious = suspiciousPatterns.some(pattern => pattern.test(title))
+        
+        if (!isSuspicious) {
+          metadata.title = title
+          break
+        }
       }
+    }
+  }
+  
+  // Fallback to document title if no good title found
+  if (!metadata.title && document.title) {
+    let title = document.title.split('|')[0].split('-')[0].trim()
+    if (title.length > 0 && title.length <= 200) {
+      metadata.title = title
     }
   }
 
   // Try to find price
   const priceSelectors = [
-    '[class*="price"]',
+    'meta[property="og:price:amount"]',
     '[itemprop="price"]',
     '[data-price]',
-    'meta[property="og:price:amount"]',
-    'span[class*="Price"]',
-    'div[class*="price"]'
+    'span[class*="currentPrice"]',
+    'span[class*="sale-price"]',
+    'span[class*="Price"]:not([class*="original"]):not([class*="was"])',
+    '[class*="price"]:not([class*="original"]):not([class*="was"])'
   ]
 
   for (const selector of priceSelectors) {
@@ -67,10 +103,20 @@ export function extractProductMetadata(imageUrl: string): ProductMetadata {
           : element.textContent?.trim()
       
       if (price && price.length > 0 && price.match(/[\d.,]/)) {
-        // Clean up price - keep numbers, currency symbols, and decimal points
+        // Clean up price
         price = price.replace(/\s+/g, ' ').trim()
-        metadata.price = price
-        break
+        
+        // Extract just the first price if multiple are present (e.g., "$189.99$270")
+        const priceMatch = price.match(/[$€£¥]?[\d,]+\.?\d*/);
+        if (priceMatch) {
+          price = priceMatch[0]
+        }
+        
+        // Validate: must be reasonable length (3-15 chars like "$9.99" to "$12,999.99")
+        if (price.length >= 1 && price.length <= 15 && !price.includes('%')) {
+          metadata.price = price
+          break
+        }
       }
     }
   }

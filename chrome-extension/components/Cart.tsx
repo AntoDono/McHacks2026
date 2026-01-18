@@ -30,6 +30,28 @@ const Cart = ({ items, onRemoveItem, onTryItOn, onClose, isLoading = false, prog
   const [loadingRecommendations, setLoadingRecommendations] = useState(false)
   const [showRecommendations, setShowRecommendations] = useState(true)
 
+  // Calculate total price from cart items
+  const calculateTotal = () => {
+    let total = 0
+    let count = 0
+    
+    items.forEach(item => {
+      if (item.price) {
+        // Remove currency symbols and commas, parse as float
+        const priceStr = item.price.replace(/[$,]/g, '')
+        const price = parseFloat(priceStr)
+        if (!isNaN(price)) {
+          total += price
+          count++
+        }
+      }
+    })
+    
+    return { total, count }
+  }
+
+  const { total, count } = calculateTotal()
+
   // Fetch recommendations when cart items change
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -134,10 +156,20 @@ const Cart = ({ items, onRemoveItem, onTryItOn, onClose, isLoading = false, prog
                     ×
                   </button>
                   <div className="cart-item-number">{index + 1}</div>
+                  {item.price && (
+                    <div className="cart-item-price">{item.price}</div>
+                  )}
                 </div>
               ))
             )}
           </div>
+
+          {items.length > 0 && count > 0 && (
+            <div className="cart-total">
+              <span className="cart-total-label">Total ({count} {count === 1 ? 'item' : 'items'}):</span>
+              <span className="cart-total-amount">${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+          )}
 
           {items.length > 0 && (
             <div className="cart-recommendations">
