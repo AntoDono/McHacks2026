@@ -8,12 +8,19 @@ import os
 import uuid
 from io import BytesIO
 
+# ============================================================================
+# CONFIGURATION: Choose generation method
+# ============================================================================
+USE_GUMLOOP = True  # Set to True to use Gumloop API instead of Gemini
+# ============================================================================
+
 try:
     from rembg import remove
 except ImportError:
     remove = None
 
 client = genai.Client()
+_gumloop_client = None
 
 prompts = {
     0: "Make this person face the front. Keep the background transparent or white.",
@@ -88,17 +95,93 @@ async def _generate_all_views(image, output_dir):
     return await asyncio.gather(*tasks)
 
 
-def generate_views(image_path):
-    """Generate 4 camera views from a single image: [0°, 90°, 180°, 270°]"""
-    image = Image.open(image_path)
+def _upload_to_cloudinary(image_path):
+    """Upload image to Cloudinary and return URL"""
+    try:
+        import cloudinary
+        import cloudinary.uploader
+        
+        # Cloudinary should be configured via CLOUDINARY_URL env variable
+        result = cloudinary.uploader.upload(
+            image_path,
+            folder="gumloop_inputs",
+            resource_type="image"
+        )
+        return result["secure_url"]
+    except ImportError:
+        raise ImportError("Cloudinary not available. Install with: pip install cloudinary")
+
+
+def _generate_views_gumloop(image_path, output_dir):
+    """Generate 4 views using Gumloop API"""
+    global _gumloop_client
     
+    try:
+        from gumloop import GumloopClient
+        import requests
+    except ImportError:
+        raise ImportError("Gumloop not available. Install with: pip install gumloop")
+    
+    # Initialize Gumloop client if not already done
+    if _gumloop_client is None:
+        _gumloop_client = GumloopClient(
+            api_key=os.getenv("GUMLOOP_API_KEY"),
+            user_id=os.getenv("GUMLOOP_USER_ID"),
+        )
+    
+    # Upload image to Cloudinary to get a URL
+    print(f"  Uploading to Cloudinary: {image_path}")
+    image_url = _upload_to_cloudinary(image_path)
+    print(f"  Cloudinary URL: {image_url}")
+    
+    # Run the Gumloop flow
+    print("  Running Gumloop flow...")
+    output = _gumloop_client.run_flow(
+        flow_id=os.getenv("GUMLOOP_FLOW_ID"),
+        inputs={"image": image_url}
+    )
+    
+    # Download images in sorted order: 0, 90, 180, 270
+    angles = [0, 90, 180, 270]
+    downloaded_paths = []
+    
+    for angle in angles:
+        key = f"image_{angle}"
+        if key in output:
+            url = output[key][0]  # Extract URL from list
+            filepath = os.path.join(output_dir, f"{angle}.png")
+            
+            response = requests.get(url)
+            with open(filepath, "wb") as f:
+                f.write(response.content)
+            
+            downloaded_paths.append(filepath)
+        else:
+            downloaded_paths.append(None)
+    
+    return downloaded_paths
+
+
+def generate_views(image_path):
+    """
+    Generate 4 camera views from a single image: [0°, 90°, 180°, 270°]
+    
+    Uses Gumloop if USE_GUMLOOP=True, otherwise uses Gemini.
+    """
     temp_dir = os.path.join(tempfile.gettempdir(), f"multiview_{uuid.uuid4()}")
     os.makedirs(temp_dir, exist_ok=True)
     
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    results = loop.run_until_complete(_generate_all_views(image, temp_dir))
-    loop.close()
+    if USE_GUMLOOP:
+        print("Using Gumloop API for generation...")
+        results = _generate_views_gumloop(image_path, temp_dir)
+    else:
+        print("Using Gemini API for generation...")
+        image = Image.open(image_path)
+        
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        results = loop.run_until_complete(_generate_all_views(image, temp_dir))
+        loop.close()
     
     return [path for path in results if path is not None]
 
@@ -108,20 +191,29 @@ if __name__ == "__main__":
     
     if len(sys.argv) < 2:
         print("Usage: python generate_views.py <image_path>")
+        method = "GUMLOOP" if USE_GUMLOOP else "GEMINI"
+        print(f"Current method: {method} (USE_GUMLOOP={USE_GUMLOOP})")
         sys.exit(1)
     
     image_path = sys.argv[1]
-    print(f"Generating 4 views from: {image_path}")
+    method = "GUMLOOP" if USE_GUMLOOP else "GEMINI"
     
-    image = Image.open(image_path)
+    print("=" * 60)
+    print(f"Multi-View Generator ({method})")
+    print("=" * 60)
+    print(f"\nGenerating 4 views from: {image_path}")
+    print("-" * 60)
     
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    results = loop.run_until_complete(_generate_all_views(image, "."))
-    loop.close()
+    results = generate_views(image_path)
     
+    print("\nGenerated views:")
     for angle, path in zip(prompts.keys(), results):
         if path and os.path.exists(path):
-            print(f"  {angle:>3}°: {path}")
+            size = os.path.getsize(path) / 1024
+            print(f"  {angle:>3}°: {path} ({size:.1f} KB)")
         else:
             print(f"  {angle:>3}°: FAILED")
+    
+    print("\n" + "=" * 60)
+    print(f"✓ Complete - {len(results)}/4 successful")
+    print("=" * 60)

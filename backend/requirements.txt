@@ -7,3 +7,5 @@ requests
 rembg[cpu]
 peewee
 numpy
+cloudinary
+gumloop
