@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import "../styles/cart.css"
 import type { CartItem } from "~utils/storage"
 
@@ -11,8 +11,79 @@ interface CartProps {
   progress?: { message: string; progress: number }
 }
 
+interface Recommendation {
+  garment: {
+    image: string
+    sku?: string
+    url?: string
+    title?: string
+    price?: string
+    metadata?: any
+    session_timestamp: string
+  }
+  similarity: number
+}
+
 const Cart = ({ items, onRemoveItem, onTryItOn, onClose, isLoading = false, progress }: CartProps) => {
   const [isMinimized, setIsMinimized] = useState(false)
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false)
+  const [showRecommendations, setShowRecommendations] = useState(true)
+
+  // Fetch recommendations when cart items change
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      console.log('Fetching recommendations for items:', items)
+      if (items.length === 0) {
+        setRecommendations([])
+        return
+      }
+
+      setLoadingRecommendations(true)
+      try {
+        const API_URL = process.env.PLASMO_PUBLIC_API_URL || `http://localhost:${process.env.PLASMO_PUBLIC_PORT || 8080}`
+        const response = await fetch(`${API_URL}/recommendations`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            cart_items: items.map(item => ({
+              imageData: item.base64 || null,
+              url: item.imageUrl || null
+            })),
+            limit: 3,
+            min_similarity: 0.25
+          })
+        })
+
+
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Data:', data)
+          if (data.success) {
+            // Filter out items that are already in cart
+            const cartUrls = items.map(i => i.imageUrl)
+            const filtered = data.recommendations.filter(
+              (rec: Recommendation) => 
+                // Exclude exact matches (100% similarity = same item)
+                rec.similarity < 0.99 &&
+                // Exclude items already in cart
+                !cartUrls.includes(rec.garment.image) && 
+                !cartUrls.includes(rec.garment.url || '')
+            )
+            setRecommendations(filtered)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching recommendations:', error)
+      } finally {
+        setLoadingRecommendations(false)
+      }
+    }
+
+    fetchRecommendations()
+  }, [items])
 
   return (
     <div className={`cart-panel ${isMinimized ? 'minimized' : ''}`}>
@@ -67,6 +138,66 @@ const Cart = ({ items, onRemoveItem, onTryItOn, onClose, isLoading = false, prog
               ))
             )}
           </div>
+
+          {items.length > 0 && (
+            <div className="cart-recommendations">
+              <div className="cart-recommendations-header">
+                <h4 className="cart-recommendations-title">
+                  ✨ You might also like
+                </h4>
+                <button
+                  className="cart-recommendations-toggle"
+                  onClick={() => setShowRecommendations(!showRecommendations)}
+                >
+                  {showRecommendations ? '−' : '+'}
+                </button>
+              </div>
+              
+              {showRecommendations && (
+                <div className="cart-recommendations-content">
+                  {loadingRecommendations ? (
+                    <div className="cart-recommendations-loading">
+                      <span className="cart-spinner"></span>
+                      Finding similar items...
+                    </div>
+                  ) : recommendations.length > 0 ? (
+                    <div className="cart-recommendations-grid">
+                      {recommendations.map((rec, index) => (
+                        <div 
+                          key={`${rec.garment.session_timestamp}-${index}`} 
+                          className="cart-recommendation-item"
+                        >
+                          <img
+                            src={rec.garment.image}
+                            alt={rec.garment.title || 'Recommended item'}
+                            className="cart-recommendation-image"
+                          />
+                          <div className="cart-recommendation-similarity">
+                            {Math.round(rec.similarity * 100)}% match
+                          </div>
+                          {rec.garment.url && (
+                            <a 
+                              href={rec.garment.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="cart-recommendation-link"
+                              title="View item"
+                            >
+                              🔗
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="cart-recommendations-empty">
+                      No recommendations found
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {items.length > 0 && (
             <div className="cart-footer">

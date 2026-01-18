@@ -258,3 +258,129 @@
   font-weight: 600;
   color: var(--primary);
 }
+
+/* Recommendations section */
+.cart-recommendations {
+  border-top: 1px solid var(--border-light);
+  background: var(--surface);
+}
+
+.cart-recommendations-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.cart-recommendations-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cart-recommendations-toggle {
+  background: var(--neutral-light);
+  border: none;
+  color: var(--text-primary);
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.cart-recommendations-toggle:hover {
+  background: var(--border-light);
+}
+
+.cart-recommendations-content {
+  padding: 0 12px 12px 12px;
+}
+
+.cart-recommendations-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+.cart-recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cart-recommendation-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--neutral-light);
+  border: 2px solid var(--border-light);
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+
+.cart-recommendation-item:hover {
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.cart-recommendation-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-recommendation-similarity {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: var(--overlay-black-70);
+  color: var(--text-on-dark);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.cart-recommendation-link {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--surface);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  text-decoration: none;
+  transition: transform 0.2s;
+  opacity: 0;
+}
+
+.cart-recommendation-item:hover .cart-recommendation-link {
+  opacity: 1;
+}
+
+.cart-recommendation-link:hover {
+  transform: scale(1.1);
+}
+
+.cart-recommendations-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-light);
+  font-size: 13px;
+}

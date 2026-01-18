@@ -1,9 +1,25 @@
 from pymongo import MongoClient, DESCENDING
 from datetime import datetime
 import os
+import io
+import base64
 from dotenv import load_dotenv
+import torch
+import open_clip
+from PIL import Image
+import numpy as np
 
 load_dotenv()
+
+# Initialize fashionSigLIP model for garment embeddings
+print("Loading fashionSigLIP model...")
+_clip_model, _, _preprocess_val = open_clip.create_model_and_transforms('hf-hub:Marqo/marqo-fashionSigLIP')
+_clip_model.eval()
+
+# Use GPU if available
+_device = "cuda" if torch.cuda.is_available() else "cpu"
+_clip_model = _clip_model.to(_device)
+print(f"✓ fashionSigLIP model loaded on {_device}")
 
 # MongoDB Atlas connection
 MONGODB_URI = os.getenv('MONGODB_URI')
@@ -18,6 +34,118 @@ db = client.get_database('tryon_db')  # Database name
 sessions_collection = db['tryon_sessions']
 garments_collection = db['garment_images']
 generated_images_collection = db['generated_images']
+
+def generate_garment_embedding(image_base64):
+    """
+    Generate embedding for a garment image using fashionSigLIP
+    
+    Args:
+        image_base64: Base64 encoded image string (with or without data URL prefix)
+        
+    Returns:
+        List of floats representing the embedding vector
+    """
+    try:
+        # Strip data URL prefix if present (e.g., "data:image/png;base64,")
+        if isinstance(image_base64, str) and ',' in image_base64:
+            # Check if it starts with data: prefix
+            if image_base64.startswith('data:'):
+                image_base64 = image_base64.split(',', 1)[1]
+        
+        # Decode base64 to image
+        image_data = base64.b64decode(image_base64)
+        image = Image.open(io.BytesIO(image_data)).convert('RGB')
+        
+        # Preprocess and generate embedding
+        image_tensor = _preprocess_val(image).unsqueeze(0).to(_device)
+        
+        with torch.no_grad():
+            image_features = _clip_model.encode_image(image_tensor)
+            # Normalize the embedding
+            image_features /= image_features.norm(dim=-1, keepdim=True)
+        
+        # Convert to list for MongoDB storage
+        embedding = image_features.cpu().numpy().flatten().tolist()
+        return embedding
+    except Exception as e:
+        print(f"Error generating embedding: {e}")
+        return None
+
+
+def search_similar_garments(query_embedding, limit=10, min_similarity=0.5):
+    """
+    Search for similar garments using cosine similarity
+    
+    Args:
+        query_embedding: Embedding vector to search with
+        limit: Maximum number of results
+        min_similarity: Minimum cosine similarity threshold
+        
+    Returns:
+        List of similar garment documents with similarity scores
+    """
+    try:
+        query_vec = np.array(query_embedding)
+        query_vec = query_vec / np.linalg.norm(query_vec)
+        
+        results = []
+        
+        # Get all garments with embeddings
+        garments = garments_collection.find({'embedding': {'$exists': True}})
+        
+        for garment in garments:
+            garment_vec = np.array(garment['embedding'])
+            # Cosine similarity (vectors are already normalized)
+            similarity = float(np.dot(query_vec, garment_vec))
+            
+            if similarity >= min_similarity:
+                results.append({
+                    'garment': {
+                        'image': garment['image'],
+                        'sku': garment.get('sku'),
+                        'url': garment.get('url'),
+                        'title': garment.get('title'),
+                        'price': garment.get('price'),
+                        'metadata': garment.get('metadata'),
+                        'session_timestamp': garment['session_timestamp']
+                    },
+                    'similarity': similarity
+                })
+        
+        # Sort by similarity descending
+        results.sort(key=lambda x: x['similarity'], reverse=True)
+        return results[:limit]
+    except Exception as e:
+        print(f"Error searching similar garments: {e}")
+        return []
+
+
+def search_garments_by_text(text_query, limit=10, min_similarity=0.3):
+    """
+    Search for garments using text query
+    
+    Args:
+        text_query: Text description to search for
+        limit: Maximum number of results
+        min_similarity: Minimum similarity threshold
+        
+    Returns:
+        List of matching garment documents with similarity scores
+    """
+    try:
+        tokenizer = open_clip.get_tokenizer('hf-hub:Marqo/marqo-fashionSigLIP')
+        text = tokenizer([text_query]).to(_device)
+        
+        with torch.no_grad():
+            text_features = _clip_model.encode_text(text)
+            text_features /= text_features.norm(dim=-1, keepdim=True)
+        
+        text_embedding = text_features.cpu().numpy().flatten().tolist()
+        return search_similar_garments(text_embedding, limit, min_similarity)
+    except Exception as e:
+        print(f"Error searching by text: {e}")
+        return []
+
 
 def initialize_db():
     """Initialize the database and create indexes"""
@@ -59,9 +187,12 @@ def save_tryon_session(timestamp, person_image_base64, garment_images_data, gene
         }
         sessions_collection.insert_one(session_doc)
         
-        # Save garment images
+        # Save garment images with embeddings
         garment_docs = []
         for i, garment_data in enumerate(garment_images_data):
+            # Generate embedding for the garment image
+            embedding = generate_garment_embedding(garment_data['image'])
+            
             garment_doc = {
                 'session_timestamp': timestamp,
                 'image': garment_data['image'],
@@ -70,7 +201,8 @@ def save_tryon_session(timestamp, person_image_base64, garment_images_data, gene
                 'url': garment_data.get('url'),
                 'title': garment_data.get('title'),
                 'price': garment_data.get('price'),
-                'metadata': garment_data.get('metadata')
+                'metadata': garment_data.get('metadata'),
+                'embedding': embedding
             }
             garment_docs.append(garment_doc)
         
@@ -202,6 +334,56 @@ def get_all_sessions(limit=50):
     except Exception as e:
         print(f"Error retrieving sessions: {e}")
         return []
+
+def backfill_embeddings():
+    """
+    Generate embeddings for existing garments that don't have them
+    
+    Returns:
+        Number of garments updated
+    """
+    try:
+        # Find garments without embeddings
+        garments = garments_collection.find({'embedding': {'$exists': False}})
+        updated = 0
+        
+        for garment in garments:
+            embedding = generate_garment_embedding(garment['image'])
+            if embedding:
+                garments_collection.update_one(
+                    {'_id': garment['_id']},
+                    {'$set': {'embedding': embedding}}
+                )
+                updated += 1
+                print(f"Generated embedding for garment {garment['_id']}")
+        
+        print(f"✓ Backfilled embeddings for {updated} garments")
+        return updated
+    except Exception as e:
+        print(f"Error backfilling embeddings: {e}")
+        return 0
+
+
+def get_garment_embedding(garment_id):
+    """
+    Get the embedding for a specific garment
+    
+    Args:
+        garment_id: MongoDB ObjectId of the garment
+        
+    Returns:
+        Embedding vector as list of floats, or None if not found
+    """
+    try:
+        from bson import ObjectId
+        garment = garments_collection.find_one({'_id': ObjectId(garment_id)})
+        if garment and 'embedding' in garment:
+            return garment['embedding']
+        return None
+    except Exception as e:
+        print(f"Error getting garment embedding: {e}")
+        return None
+
 
 # Initialize database on import
 initialize_db()

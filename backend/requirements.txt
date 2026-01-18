@@ -10,3 +10,5 @@ dnspython
 numpy
 cloudinary
 gumloop
+open_clip_torch
+torch

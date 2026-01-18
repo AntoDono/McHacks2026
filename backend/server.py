@@ -23,7 +23,7 @@ from put_on import put_on
 from generate_views import generate_views
 
 # Import database functions
-from db import save_tryon_session, get_tryon_session, get_all_sessions
+from db import save_tryon_session, get_tryon_session, get_all_sessions, search_similar_garments, generate_garment_embedding
 
 app = Flask(__name__)
 CORS(app)
@@ -674,6 +674,88 @@ def get_session(timestamp: str):
                 "error": "Session not found"
             }), 404
     except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route("/recommendations", methods=["POST"])
+def get_recommendations():
+    """Get garment recommendations based on cart items"""
+    try:
+        data = request.get_json()
+        cart_items = data.get('cart_items', [])
+        limit = data.get('limit', 10)
+        min_similarity = data.get('min_similarity', 0.5)
+        
+        if not cart_items:
+            return jsonify({
+                "success": False,
+                "error": "No cart items provided"
+            }), 400
+        
+        # Generate embeddings for cart items
+        embeddings = []
+        for item in cart_items:
+            image_data = None
+            
+            # Try to get image data from base64 first
+            if item.get('imageData'):
+                image_data = item.get('imageData')
+            # Fall back to downloading from URL
+            elif item.get('url'):
+                try:
+                    url = item.get('url')
+                    print(f"Downloading image from URL for recommendation: {url}")
+                    # Download image temporarily
+                    temp_path = UPLOAD_FOLDER / f"temp_rec_{int(time.time()*1000)}.jpg"
+                    download_image_from_url(url, temp_path)
+                    
+                    # Read as base64
+                    with open(temp_path, "rb") as img_file:
+                        img_bytes = base64.b64encode(img_file.read()).decode("utf-8")
+                    image_data = f"data:image/jpeg;base64,{img_bytes}"
+                    
+                    # Clean up
+                    temp_path.unlink()
+                except Exception as e:
+                    print(f"Error downloading image from URL: {e}")
+                    continue
+            
+            # Generate embedding
+            if image_data:
+                embedding = generate_garment_embedding(image_data)
+                if embedding:
+                    embeddings.append(embedding)
+        
+        if not embeddings:
+            return jsonify({
+                "success": False,
+                "error": "Could not generate embeddings for cart items"
+            }), 400
+        
+        # Calculate average embedding
+        import numpy as np
+        avg_embedding = np.mean(embeddings, axis=0).tolist()
+        
+        # Search for similar garments
+        recommendations = search_similar_garments(
+            query_embedding=avg_embedding,
+            limit=limit,
+            min_similarity=min_similarity
+        )
+        
+        return jsonify({
+            "success": True,
+            "recommendations": recommendations,
+            "count": len(recommendations)
+        })
+        
+    except Exception as e:
+        print(f"Error getting recommendations: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "success": False,
             "error": str(e)
