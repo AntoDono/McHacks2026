@@ -2,7 +2,7 @@
 
 ![Mirr.AI Logo](chrome-extension/assets/icon.png)
 # **Mirr.AI**
-## Real-Time Generative Virtual Try-On System
+## Real-Time 3D Generative Virtual Try-On System & Fashion Recommendations
 
 *Multi-modal AI pipeline for photorealistic clothing transfer with 360° view synthesis*
 
@@ -39,6 +39,30 @@ The system implements a **cascaded generative pipeline** that:
 - Executes **U2-Net semantic segmentation** for precise alpha matting and background isolation
 - Delivers results through **Server-Sent Events (SSE)** for real-time progress streaming
 - Powers **AI-driven outfit recommendations** through fashion-domain CLIP embeddings and cosine similarity search
+
+---
+
+## 🎬 Demo
+
+### AI-Powered Outfit Recommendations
+*Semantic fashion search using FashionSigLIP embeddings to suggest visually cohesive pieces*
+
+![AI Recommendations](examples/recommendation.png)
+
+### Smart Price Detection
+*Automatic extraction of product metadata from any e-commerce site*
+
+![Price Detection](examples/price.png)
+
+### Virtual Try-On Results
+*Photorealistic garment transfer powered by Vertex AI diffusion models*
+
+<table>
+  <tr>
+    <td><img src="examples/try-on-1.png" alt="Try-On Example 1" width="400"/></td>
+    <td><img src="examples/try-on-2.png" alt="Try-On Example 2" width="400"/></td>
+  </tr>
+</table>
 
 ---
 

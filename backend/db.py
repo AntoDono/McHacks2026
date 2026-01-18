@@ -156,6 +156,8 @@ def initialize_db():
         
         garments_collection.create_index('session_timestamp')
         garments_collection.create_index([('session_timestamp', 1), ('order', 1)])
+        # Unique index on URL to prevent duplicate garments (sparse to allow null URLs)
+        garments_collection.create_index('url', unique=True, sparse=True)
         
         generated_images_collection.create_index('session_timestamp')
         generated_images_collection.create_index([('session_timestamp', 1), ('view_index', 1)])
@@ -187,9 +189,18 @@ def save_tryon_session(timestamp, person_image_base64, garment_images_data, gene
         }
         sessions_collection.insert_one(session_doc)
         
-        # Save garment images with embeddings
+        # Save garment images with embeddings (skip duplicates by URL)
         garment_docs = []
         for i, garment_data in enumerate(garment_images_data):
+            garment_url = garment_data.get('url')
+            
+            # Check if garment with same URL already exists
+            if garment_url:
+                existing = garments_collection.find_one({'url': garment_url})
+                if existing:
+                    print(f"Skipping duplicate garment (URL already exists): {garment_url[:60]}...")
+                    continue
+            
             # Generate embedding for the garment image
             embedding = generate_garment_embedding(garment_data['image'])
             
@@ -198,7 +209,7 @@ def save_tryon_session(timestamp, person_image_base64, garment_images_data, gene
                 'image': garment_data['image'],
                 'order': i,
                 'sku': garment_data.get('sku'),
-                'url': garment_data.get('url'),
+                'url': garment_url,
                 'title': garment_data.get('title'),
                 'price': garment_data.get('price'),
                 'metadata': garment_data.get('metadata'),
