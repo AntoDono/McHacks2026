@@ -52,48 +52,249 @@
   --border: #C7C1BE;
   --border-light: #E8DCC4;
   --border-dark: #54534F;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(84, 83, 79, 0.08);
+  --shadow-md: 0 4px 12px rgba(84, 83, 79, 0.12);
+  --shadow-lg: 0 4px 20px rgba(84, 83, 79, 0.15);
+  --shadow-xl: 0 8px 32px rgba(84, 83, 79, 0.3);
+  --shadow-primary: 0 4px 8px rgba(152, 136, 118, 0.2);
+  --shadow-primary-hover: 0 4px 16px rgba(152, 136, 118, 0.4);
+  --shadow-primary-sm: 0 2px 8px rgba(152, 136, 118, 0.3);
+
+  /* Overlay/Backdrop Colors */
+  --overlay-dark: rgba(84, 83, 79, 0.6);
+  --overlay-darker: rgba(84, 83, 79, 0.8);
+  --overlay-black-60: rgba(0, 0, 0, 0.6);
+  --overlay-black-70: rgba(0, 0, 0, 0.7);
+  --overlay-black-80: rgba(0, 0, 0, 0.8);
+  --overlay-black-90: rgba(0, 0, 0, 0.9);
+  --overlay-white-30: rgba(255, 255, 255, 0.3);
+  --overlay-gradient: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+
+  /* Text on Dark Backgrounds */
+  --text-on-dark: var(--surface);
+
+  /* Error Colors */
+  --error-bg: #fee;
+  --error-border: #fcc;
+  --error-text: #c33;
 }
 
-/* Quiet Luxury Color Scheme - Scoped to content script overlay */
+/* Wraith Color Scheme - Scoped to content script overlay */
 #plasmo-image-overlay-root {
   /* Font Families */
-  --font-title: 'Megant', Georgia, serif !important;
-  --font-text: 'CreatoDisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  --font-title: 'Megant', Georgia, serif;
+  --font-text: 'CreatoDisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Primary Colors */
-  --primary: #988876 !important; /* Roasted Cashew */
-  --primary-light: #a89886 !important;
-  --primary-dark: #857766 !important;
+  --primary: #047C58; /* Deep Teal */
+  --primary-light: #059a6f;
+  --primary-dark: #035d44;
   
   /* Secondary Colors */
-  --secondary: #E8DCC4 !important; /* Frozen Dew */
-  --secondary-light: #f0e8d4 !important;
-  --secondary-dark: #d8ccb4 !important;
+  --secondary: #8C886B; /* Muted Olive */
+  --secondary-light: #a5a189;
+  --secondary-dark: #736f56;
   
   /* Accent Colors */
-  --accent: #54534F !important; /* Dark Night */
-  --accent-light: #64635f !important;
-  --accent-dark: #44433f !important;
+  --accent: #342005; /* Dark Brown */
+  --accent-light: #4a2f0a;
+  --accent-dark: #1E1702;
   
   /* Neutral Colors */
-  --neutral-grey: #C7C1BE !important; /* Temple Grey */
-  --neutral-light: #EFEAE5 !important; /* Snowfall */
-  --neutral-dark: #54534F !important;
+  --neutral-grey: #8C886B; /* Muted Olive */
+  --neutral-light: #E5E3E4; /* Light Grey */
+  --neutral-dark: #342005;
   
   /* Semantic Colors */
-  --background: #EFEAE5 !important; /* Snowfall */
-  --surface: #FFFFFF !important;
-  --text-primary: #54534F !important; /* Dark Night */
-  --text-secondary: #988876 !important; /* Roasted Cashew */
-  --text-light: #C7C1BE !important; /* Temple Grey */
+  --background: #E5E3E4; /* Light Grey */
+  --surface: #FFFFFF;
+  --text-primary: #1E1702; /* Very Dark Brown */
+  --text-secondary: #342005; /* Dark Brown */
+  --text-light: #8C886B; /* Muted Olive */
   
   /* Border Colors */
-  --border: #C7C1BE !important;
-  --border-light: #E8DCC4 !important;
-  --border-dark: #54534F !important;
+  --border: #8C886B;
+  --border-light: #E5E3E4;
+  --border-dark: #342005;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(30, 23, 2, 0.08);
+  --shadow-md: 0 4px 12px rgba(30, 23, 2, 0.12);
+  --shadow-lg: 0 4px 20px rgba(30, 23, 2, 0.15);
+  --shadow-xl: 0 8px 32px rgba(30, 23, 2, 0.3);
+  --shadow-primary: 0 4px 8px rgba(4, 124, 88, 0.2);
+  --shadow-primary-hover: 0 4px 16px rgba(4, 124, 88, 0.4);
+  --shadow-primary-sm: 0 2px 8px rgba(4, 124, 88, 0.3);
+
+  /* Overlay/Backdrop Colors */
+  --overlay-dark: rgba(30, 23, 2, 0.6);
+  --overlay-darker: rgba(30, 23, 2, 0.8);
+  --overlay-black-60: rgba(0, 0, 0, 0.6);
+  --overlay-black-70: rgba(0, 0, 0, 0.7);
+  --overlay-black-80: rgba(0, 0, 0, 0.8);
+  --overlay-black-90: rgba(0, 0, 0, 0.9);
+  --overlay-white-30: rgba(255, 255, 255, 0.3);
+  --overlay-gradient: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+
+  /* Text on Dark Backgrounds */
+  --text-on-dark: var(--surface);
+
+  /* Error Colors */
+  --error-bg: #fee;
+  --error-border: #fcc;
+  --error-text: #c33;
 }
 
-/* Base Typography - Scoped to extension only */
+/* Scoped overrides for content script */
+#plasmo-image-overlay-root {
+  --font-title: 'Megant', Georgia, serif !important;
+  --font-text: 'CreatoDisplay', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  --primary: #047C58 !important;
+  --primary-light: #059a6f !important;
+  --primary-dark: #035d44 !important;
+  --secondary: #8C886B !important;
+  --secondary-light: #a5a189 !important;
+  --secondary-dark: #736f56 !important;
+  --accent: #342005 !important;
+  --accent-light: #4a2f0a !important;
+  --accent-dark: #1E1702 !important;
+  --neutral-grey: #8C886B !important;
+  --neutral-light: #E5E3E4 !important;
+  --neutral-dark: #342005 !important;
+  --background: #E5E3E4 !important;
+  --surface: #FFFFFF !important;
+  --text-primary: #1E1702 !important;
+  --text-secondary: #342005 !important;
+  --text-light: #8C886B !important;
+  --border: #8C886B !important;
+  --border-light: #E5E3E4 !important;
+  --border-dark: #342005 !important;
+  --overlay-dark: rgba(30, 23, 2, 0.6) !important;
+  --overlay-darker: rgba(30, 23, 2, 0.8) !important;
+  --overlay-black-60: rgba(0, 0, 0, 0.6) !important;
+  --overlay-black-70: rgba(0, 0, 0, 0.7) !important;
+  --overlay-black-80: rgba(0, 0, 0, 0.8) !important;
+  --overlay-black-90: rgba(0, 0, 0, 0.9) !important;
+  --overlay-white-30: rgba(255, 255, 255, 0.3) !important;
+  --overlay-gradient: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent) !important;
+  --text-on-dark: var(--surface) !important;
+  --error-bg: #fee !important;
+  --error-border: #fcc !important;
+  --error-text: #c33 !important;
+}
+
+/* Base Typography - Global */
+* {
+  box-sizing: border-box;
+}
+
+body,
+p,
+span,
+div,
+input,
+button,
+textarea,
+label,
+a {
+  font-family: var(--font-text);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Shared Utility Classes */
+.btn-primary {
+  padding: 14px 20px;
+  background-color: var(--primary);
+  color: var(--surface);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-text);
+  text-align: center;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-primary);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border);
+}
+
+.text-title {
+  font-family: var(--font-title);
+  font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.text-body {
+  font-family: var(--font-text);
+}
+
+/* Scoped overrides for content script */
 #plasmo-image-overlay-root * {
   box-sizing: border-box !important;
 }
@@ -115,5 +316,7 @@
 #plasmo-image-overlay-root h5,
 #plasmo-image-overlay-root h6 {
   font-family: var(--font-title) !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }

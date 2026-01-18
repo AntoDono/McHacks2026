@@ -323,7 +323,7 @@
   padding: 24px !important;
   max-width: 400px !important;
   min-width: 350px !important;
-  background-color: white !important;
+  background-color: var(--surface) !important;
   border-radius: 15px !important;
   display: block !important;
   box-sizing: border-box !important;
@@ -338,7 +338,7 @@
   background: none !important;
   border: none !important;
   font-size: 24px !important;
-  color: #999 !important;
+  color: var(--text-light) !important;
   cursor: pointer !important;
   line-height: 1 !important;
   padding: 4px 8px !important;
@@ -348,14 +348,14 @@
 }
 
 #plasmo-image-overlay-root .setup-close:hover {
-  color: #333 !important;
+  color: var(--text-secondary) !important;
 }
 
 #plasmo-image-overlay-root .setup-title {
   all: initial !important;
   font-size: 28px !important;
   font-weight: 600 !important;
-  color: #000 !important;
+  color: var(--text-primary) !important;
   margin: 0 0 8px 0 !important;
   text-align: center !important;
   display: block !important;
@@ -367,7 +367,7 @@
 #plasmo-image-overlay-root .setup-subtitle {
   all: initial !important;
   font-size: 14px !important;
-  color: #666 !important;
+  color: var(--text-light) !important;
   margin: 0 0 24px 0 !important;
   text-align: center !important;
   display: block !important;
@@ -396,7 +396,7 @@
   all: initial !important;
   font-size: 16px !important;
   font-weight: 550 !important;
-  color: #000 !important;
+  color: var(--text-primary) !important;
   margin: 0 !important;
   display: block !important;
   font-family: var(--font-title) !important;
@@ -407,13 +407,13 @@
 /* Dropzone Styles */
 #plasmo-image-overlay-root .dropzone {
   all: initial !important;
-  border: 2px dashed #d0d0d0 !important;
+  border: 2px dashed var(--border-light) !important;
   border-radius: 8px !important;
   padding: 48px 24px !important;
   text-align: center !important;
   cursor: pointer !important;
   transition: border-color 0.2s ease !important;
-  background-color: white !important;
+  background-color: var(--surface) !important;
   min-height: 160px !important;
   display: flex !important;
   align-items: center !important;
@@ -423,17 +423,17 @@
 }
 
 #plasmo-image-overlay-root .dropzone:hover {
-  border-color: #999 !important;
+  border-color: var(--text-light) !important;
 }
 
 #plasmo-image-overlay-root .dropzone-active {
-  border-color: #999 !important;
+  border-color: var(--text-light) !important;
 }
 
 #plasmo-image-overlay-root .dropzone-has-image {
   padding: 8px !important;
-  border: 2px solid #ddd !important;
-  background-color: white !important;
+  border: 2px solid var(--border-light) !important;
+  background-color: var(--surface) !important;
   cursor: pointer !important;
 }
 
@@ -442,7 +442,7 @@
 }
 
 #plasmo-image-overlay-root .dropzone-processing {
-  border-color: #999 !important;
+  border-color: var(--text-light) !important;
   cursor: wait !important;
 }
 
@@ -468,7 +468,7 @@
   all: initial !important;
   width: 48px !important;
   height: 48px !important;
-  color: #999 !important;
+  color: var(--text-light) !important;
   display: block !important;
 }
 
@@ -476,8 +476,8 @@
   all: initial !important;
   width: 40px !important;
   height: 40px !important;
-  border: 3px solid #f3f3f3 !important;
-  border-top: 3px solid #666 !important;
+  border: 3px solid var(--neutral-light) !important;
+  border-top: 3px solid var(--text-light) !important;
   border-radius: 50% !important;
   animation: spin 1s linear infinite !important;
   display: block !important;
@@ -492,7 +492,7 @@
 #plasmo-image-overlay-root .dropzone-text {
   all: initial !important;
   font-size: 14px !important;
-  color: #333 !important;
+  color: var(--text-secondary) !important;
   margin: 0 0 4px 0 !important;
   line-height: 1.4 !important;
   display: block !important;
@@ -503,7 +503,7 @@
 #plasmo-image-overlay-root .dropzone-subtext {
   all: initial !important;
   font-size: 12px !important;
-  color: #999 !important;
+  color: var(--text-light) !important;
   margin: 0 !important;
   line-height: 1.4 !important;
   display: block !important;
@@ -537,7 +537,7 @@
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  background-color: rgba(0, 0, 0, 0) !important;
+  background-color: transparent !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -548,12 +548,12 @@
 }
 
 #plasmo-image-overlay-root .dropzone-has-image:hover .preview-overlay {
-  background-color: rgba(0, 0, 0, 0.5) !important;
+  background-color: var(--overlay-black-60) !important;
 }
 
 #plasmo-image-overlay-root .preview-change-text {
   all: initial !important;
-  color: white !important;
+  color: var(--text-on-dark) !important;
   font-size: 16px !important;
   font-weight: 500 !important;
   opacity: 0 !important;
@@ -610,8 +610,8 @@
 #plasmo-image-overlay-root .setup-button {
   all: initial !important;
   padding: 14px 24px !important;
-  background-color: var(--accent) !important;
-  color: white !important;
+  background-color: var(--primary) !important;
+  color: var(--surface) !important;
   border: none !important;
   border-radius: 8px !important;
   font-size: 16px !important;
@@ -626,9 +626,9 @@
 }
 
 #plasmo-image-overlay-root .setup-button:hover {
-  background-color: var(--accent-dark) !important;
+  background-color: var(--primary-dark) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: var(--shadow-primary) !important;
 }
 
 #plasmo-image-overlay-root .setup-button:active {
@@ -644,10 +644,10 @@
 #plasmo-image-overlay-root .error-message {
   all: initial !important;
   padding: 12px !important;
-  background-color: #fee !important;
-  border: 1px solid #fcc !important;
-  border-radius: 8px !important;
-  color: #c33 !important;
+  background-color: var(--error-bg) !important;
+  border: 1px solid var(--error-border) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--error-text) !important;
   font-size: 13px !important;
   text-align: center !important;
   display: block !important;
