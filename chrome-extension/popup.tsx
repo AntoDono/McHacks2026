@@ -6,13 +6,25 @@ import type { UserData } from "~types/user"
 import "./styles/globals.css"
 import "./styles/popup.css"
 
+interface TryOnSession {
+  timestamp: string
+  created_at: string
+  person_image: string
+  main_image: string | null
+  garment_count: number
+  generated_count: number
+}
+
 function IndexPopup() {
   const [isLoading, setIsLoading] = useState(true)
   const [userData, setUserData] = useState<UserData | null>(null)
+  const [sessions, setSessions] = useState<TryOnSession[]>([])
+  const [loadingSessions, setLoadingSessions] = useState(false)
 
   // Check if user is setup on load
   useEffect(() => {
     loadUserData()
+    loadSessions()
   }, [])
 
   const loadUserData = async () => {
@@ -23,6 +35,22 @@ function IndexPopup() {
       console.error("Error loading user data:", error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadSessions = async () => {
+    setLoadingSessions(true)
+    try {
+      const API_URL = process.env.PLASMO_PUBLIC_API_URL || `http://localhost:${process.env.PLASMO_PUBLIC_PORT || 8080}`
+      const response = await fetch(`${API_URL}/sessions?limit=20`)
+      const data = await response.json()
+      if (data.success) {
+        setSessions(data.sessions)
+      }
+    } catch (error) {
+      console.error("Error loading sessions:", error)
+    } finally {
+      setLoadingSessions(false)
     }
   }
 
@@ -95,6 +123,59 @@ function IndexPopup() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Previously Tried Fits Gallery */}
+      <div className="popup-gallery-section">
+        <div className="popup-gallery-header-row">
+          <h3 className="popup-gallery-header">
+            Previously Tried Fits ✨
+          </h3>
+          {!loadingSessions && sessions.length > 0 && (
+            <span className="popup-gallery-count">{sessions.length}</span>
+          )}
+        </div>
+        
+        {loadingSessions ? (
+          <div className="popup-gallery-loading">
+            <p>Loading your fits...</p>
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="popup-gallery-empty">
+            <p>No previous fits yet. Start shopping to see your try-ons here!</p>
+          </div>
+        ) : (
+          <div className="popup-gallery-grid">
+            {sessions.map((session) => (
+              <div key={session.timestamp} className="popup-gallery-item">
+                {session.main_image ? (
+                  <img
+                    src={session.main_image}
+                    alt={`Try-on from ${new Date(session.created_at).toLocaleDateString()}`}
+                    className="popup-gallery-image"
+                  />
+                ) : (
+                  <div className="popup-gallery-placeholder">
+                    No image
+                  </div>
+                )}
+                <div className="popup-gallery-item-info">
+                  <span className="popup-gallery-date">
+                    {new Date(session.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </span>
+                  {session.garment_count > 1 && (
+                    <span className="popup-gallery-badge">
+                      {session.garment_count} items
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <button

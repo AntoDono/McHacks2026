@@ -2,3 +2,4 @@ venv/
 env/
 gen-lang-client-*.json
 __pycache__/
+*.db
