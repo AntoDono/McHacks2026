@@ -80,6 +80,191 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Photo Options Styles */
+.photo-options {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.photo-option-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 16px;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-text);
+}
+
+.photo-option-button:hover {
+  border-color: var(--primary);
+  background-color: rgba(0, 0, 0, 0.02);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.photo-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  color: var(--primary);
+  font-size: 24px;
+}
+
+.photo-option-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: var(--font-text);
+}
+
+.photo-options-single {
+  justify-content: center;
+}
+
+.photo-option-button-full {
+  max-width: 200px;
+}
+
+.dropzone-dragarea {
+  margin-top: 8px;
+  padding: 16px;
+  border: 2px dashed transparent;
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.dropzone-dragarea.dropzone-active {
+  border-color: var(--primary);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Camera Modal Styles */
+.camera-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.95) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 999999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.camera-container {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  min-width: 300px;
+  min-height: 400px;
+  background-color: #000;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 10;
+}
+
+.camera-loading-text {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  font-family: var(--font-text);
+}
+
+.camera-video {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: calc(90vh - 80px);
+}
+
+.camera-video-hidden {
+  opacity: 0;
+  position: absolute;
+}
+
+.camera-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #000;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.camera-close:hover {
+  background-color: #fff;
+  transform: scale(1.1);
+}
+
+.camera-capture-button {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 32px;
+  background-color: var(--primary);
+  color: var(--surface);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  font-family: var(--font-text);
+}
+
+.camera-capture-button:hover {
+  background-color: var(--primary-dark);
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 /* Dropzone Styles */
 .dropzone {
   border: 2px dashed #d0d0d0;
@@ -653,4 +838,201 @@
   display: block !important;
   box-sizing: border-box !important;
   font-family: var(--font-text) !important;
+}
+
+/* Photo Options Styles */
+#plasmo-image-overlay-root .photo-options {
+  all: initial !important;
+  display: flex !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#plasmo-image-overlay-root .photo-option-button {
+  all: initial !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 32px 16px !important;
+  border: 2px solid var(--border-light) !important;
+  border-radius: 8px !important;
+  background-color: var(--surface) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: var(--font-text) !important;
+}
+
+#plasmo-image-overlay-root .photo-option-button:hover {
+  border-color: var(--primary) !important;
+  background-color: var(--neutral-light) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+#plasmo-image-overlay-root .photo-option-icon {
+  all: initial !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 48px !important;
+  height: 48px !important;
+  color: var(--primary) !important;
+  font-size: 24px !important;
+}
+
+#plasmo-image-overlay-root .photo-option-text {
+  all: initial !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-text) !important;
+}
+
+#plasmo-image-overlay-root .photo-options-single {
+  justify-content: center !important;
+}
+
+#plasmo-image-overlay-root .photo-option-button-full {
+  max-width: 200px !important;
+}
+
+#plasmo-image-overlay-root .dropzone-dragarea {
+  all: initial !important;
+  margin-top: 8px !important;
+  padding: 16px !important;
+  border: 2px dashed transparent !important;
+  border-radius: 8px !important;
+  text-align: center !important;
+  transition: all 0.2s ease !important;
+}
+
+#plasmo-image-overlay-root .dropzone-dragarea.dropzone-active {
+  border-color: var(--primary) !important;
+  background-color: var(--neutral-light) !important;
+}
+
+/* Camera Modal Styles */
+#plasmo-image-overlay-root .camera-modal {
+  all: initial !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.95) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 999999 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#plasmo-image-overlay-root .camera-container {
+  all: initial !important;
+  position: relative !important;
+  max-width: 90vw !important;
+  max-height: 90vh !important;
+  min-width: 300px !important;
+  min-height: 400px !important;
+  background-color: #000 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#plasmo-image-overlay-root .camera-loading {
+  all: initial !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 16px !important;
+  z-index: 10 !important;
+}
+
+#plasmo-image-overlay-root .camera-loading-text {
+  all: initial !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  margin: 0 !important;
+  font-family: var(--font-text) !important;
+}
+
+#plasmo-image-overlay-root .camera-video {
+  all: initial !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  max-height: calc(90vh - 80px) !important;
+}
+
+#plasmo-image-overlay-root .camera-video-hidden {
+  opacity: 0 !important;
+  position: absolute !important;
+}
+
+#plasmo-image-overlay-root .camera-close {
+  all: initial !important;
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  font-size: 18px !important;
+  color: #000 !important;
+  transition: all 0.2s ease !important;
+  z-index: 10 !important;
+}
+
+#plasmo-image-overlay-root .camera-close:hover {
+  background-color: #fff !important;
+  transform: scale(1.1) !important;
+}
+
+#plasmo-image-overlay-root .camera-capture-button {
+  all: initial !important;
+  position: absolute !important;
+  bottom: 24px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  padding: 14px 32px !important;
+  background-color: var(--primary) !important;
+  color: var(--surface) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: all 0.2s ease !important;
+  font-family: var(--font-text) !important;
+}
+
+#plasmo-image-overlay-root .camera-capture-button:hover {
+  background-color: var(--primary-dark) !important;
+  transform: translateX(-50%) translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }

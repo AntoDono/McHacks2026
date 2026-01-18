@@ -1,4 +1,4 @@
-import { useState, useRef, type DragEvent } from "react"
+import { useState, useRef, useEffect, type DragEvent } from "react"
 import { validateFile } from "~utils/fileValidation"
 
 const API_URL = process.env.PLASMO_PUBLIC_API_URL || `http://localhost:${process.env.PLASMO_PUBLIC_PORT || 8080}`
@@ -44,7 +44,12 @@ export const useFileUpload = () => {
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string>("")
+  const [showCamera, setShowCamera] = useState(false)
+  const [isCameraReady, setIsCameraReady] = useState(false)
+  const [stream, setStream] = useState<MediaStream | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const handleFileSelect = async (file: File) => {
     const validationError = validateFile(file)
@@ -119,6 +124,94 @@ export const useFileUpload = () => {
     }
   }
 
+  const startCamera = async () => {
+    setShowCamera(true) // Show modal first
+    setIsCameraReady(false) // Reset camera ready state
+    setError("")
+    
+    try {
+      console.log("Requesting camera access...")
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false 
+      })
+      console.log("Camera access granted")
+      setStream(mediaStream)
+      
+      // Wait for video element to be available and set the stream
+      const checkVideoReady = () => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream
+          // Listen for when video can play
+          videoRef.current.onloadedmetadata = () => {
+            console.log("Video stream ready")
+            setIsCameraReady(true)
+          }
+        } else {
+          // Retry if video element not available yet
+          setTimeout(checkVideoReady, 50)
+        }
+      }
+      checkVideoReady()
+    } catch (err) {
+      console.error("Camera error:", err)
+      const errorMessage = err instanceof Error ? err.message : "Failed to access camera. Please allow camera permissions."
+      setError(errorMessage)
+      setShowCamera(false) // Hide modal on error
+    }
+  }
+
+  const capturePhoto = async () => {
+    if (!videoRef.current || !canvasRef.current) return
+
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    
+    // Draw video frame to canvas
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+    
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    
+    // Convert canvas to blob then to file
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        setError("Failed to capture photo")
+        return
+      }
+      
+      const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" })
+      stopCamera()
+      await handleFileSelect(file)
+    }, "image/jpeg", 0.95)
+  }
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop())
+      setStream(null)
+    }
+    setShowCamera(false)
+    setIsCameraReady(false)
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop())
+      }
+    }
+  }, [stream])
+
   return {
     photo,
     setPhoto,
@@ -127,11 +220,18 @@ export const useFileUpload = () => {
     error,
     setError,
     fileInputRef,
+    videoRef,
+    canvasRef,
+    showCamera,
+    isCameraReady,
     handleDragEnter,
     handleDragLeave,
     handleDragOver,
     handleDrop,
     handleFileInputChange,
-    openFileDialog
+    openFileDialog,
+    startCamera,
+    capturePhoto,
+    stopCamera
   }
 }

@@ -240,8 +240,10 @@ function IndexPopup() {
   }
 
   // Show setup if user hasn't completed it
+  // Camera is disabled in popup because Chrome popups close when they lose focus
+  // (which happens when the camera permission dialog appears)
   if (!userData?.isSetup) {
-    return <Setup onSetupComplete={handleSetupComplete} />
+    return <Setup onSetupComplete={handleSetupComplete} enableCamera={false} />
   }
 
   // Show session detail view if a session is selected
