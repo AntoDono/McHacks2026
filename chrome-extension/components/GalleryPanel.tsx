@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { getStoredGalleryImages, GALLERY_IMAGES_KEY } from '~utils/storage'
+import { createStopPropagationHandler } from '~utils/events'
 
 import '../styles/gallery-panel.css'
 import '../styles/content.css'
@@ -66,8 +67,8 @@ const GalleryPanel = ({ isOpen, onClose }: GalleryPanelProps) => {
   return (
     <div
       className="gallery-panel"
-      onClick={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
+      onClick={createStopPropagationHandler()}
+      onMouseDown={createStopPropagationHandler()}
     >
         <div className="gallery-panel-header">
           <h3>Product Gallery</h3>

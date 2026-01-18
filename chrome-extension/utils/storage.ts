@@ -1,16 +1,29 @@
 import { DEFAULT_USER_DATA, STORAGE_KEYS, type UserData } from "~types/user"
 
 /**
- * Save user data to Chrome local storage
+ * Generic helper to get data from Chrome storage
  */
-export const saveUserData = async (userData: UserData): Promise<void> => {
+const storageGet = <T>(keys: string[]): Promise<Record<string, T>> => {
   return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [STORAGE_KEYS.USER_DATA]: userData }, () => {
+    chrome.storage.local.get(keys, (result) => {
       if (chrome.runtime.lastError) {
-        console.error("Error saving user data:", chrome.runtime.lastError)
         reject(chrome.runtime.lastError)
       } else {
-        console.log("User data saved successfully:", userData)
+        resolve(result as Record<string, T>)
+      }
+    })
+  })
+}
+
+/**
+ * Generic helper to set data in Chrome storage
+ */
+const storageSet = (items: Record<string, any>): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set(items, () => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError)
+      } else {
         resolve()
       }
     })
@@ -18,21 +31,31 @@ export const saveUserData = async (userData: UserData): Promise<void> => {
 }
 
 /**
+ * Save user data to Chrome local storage
+ */
+export const saveUserData = async (userData: UserData): Promise<void> => {
+  try {
+    await storageSet({ [STORAGE_KEYS.USER_DATA]: userData })
+    console.log("User data saved successfully:", userData)
+  } catch (error) {
+    console.error("Error saving user data:", error)
+    throw error
+  }
+}
+
+/**
  * Get user data from Chrome local storage
  * Returns default data if not found
  */
 export const getUserData = async (): Promise<UserData> => {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get([STORAGE_KEYS.USER_DATA], (result) => {
-      if (chrome.runtime.lastError) {
-        console.error("Error retrieving user data:", chrome.runtime.lastError)
-        reject(chrome.runtime.lastError)
-      } else {
-        const userData = result[STORAGE_KEYS.USER_DATA] as UserData | undefined
-        resolve(userData || DEFAULT_USER_DATA)
-      }
-    })
-  })
+  try {
+    const result = await storageGet<UserData>([STORAGE_KEYS.USER_DATA])
+    const userData = result[STORAGE_KEYS.USER_DATA] as UserData | undefined
+    return userData || DEFAULT_USER_DATA
+  } catch (error) {
+    console.error("Error retrieving user data:", error)
+    throw error
+  }
 }
 
 /**
@@ -70,33 +93,26 @@ export const GALLERY_IMAGES_KEY = 'gallery_images'
  * Save gallery images to Chrome local storage
  */
 export const saveGalleryImages = async (images: string[]): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [GALLERY_IMAGES_KEY]: images }, () => {
-      if (chrome.runtime.lastError) {
-        console.error("Error saving gallery images:", chrome.runtime.lastError)
-        reject(chrome.runtime.lastError)
-      } else {
-        resolve()
-      }
-    })
-  })
+  try {
+    await storageSet({ [GALLERY_IMAGES_KEY]: images })
+  } catch (error) {
+    console.error("Error saving gallery images:", error)
+    throw error
+  }
 }
 
 /**
  * Get gallery images from Chrome local storage
  */
 export const getStoredGalleryImages = async (): Promise<string[]> => {
-  return new Promise((resolve, reject) => {
-    chrome.storage.local.get([GALLERY_IMAGES_KEY], (result) => {
-      if (chrome.runtime.lastError) {
-        console.error("Error retrieving gallery images:", chrome.runtime.lastError)
-        reject(chrome.runtime.lastError)
-      } else {
-        const images = result[GALLERY_IMAGES_KEY] as string[] | undefined
-        resolve(images || [])
-      }
-    })
-  })
+  try {
+    const result = await storageGet<string[]>([GALLERY_IMAGES_KEY])
+    const images = result[GALLERY_IMAGES_KEY] as string[] | undefined
+    return images || []
+  } catch (error) {
+    console.error("Error retrieving gallery images:", error)
+    throw error
+  }
 }
 
 /**

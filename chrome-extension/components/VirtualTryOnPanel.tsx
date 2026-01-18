@@ -1,4 +1,5 @@
 import type { UserData } from "~types/user"
+import { preventDefaultAndStop, createStopPropagationHandler } from "~utils/events"
 
 import "../styles/virtual-try-on-panel.css"
 
@@ -10,16 +11,15 @@ interface VirtualTryOnPanelProps {
 
 const VirtualTryOnPanel = ({ userData, productImages, onClose }: VirtualTryOnPanelProps) => {
   const handleCloseClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    preventDefaultAndStop(e)
     onClose()
   }
 
   return (
     <div
       className="virtual-try-on-panel"
-      onClick={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
+      onClick={createStopPropagationHandler()}
+      onMouseDown={createStopPropagationHandler()}
     >
         <div className="virtual-try-on-panel-header">
           <h2 className="virtual-try-on-panel-title">Virtual Try-On</h2>

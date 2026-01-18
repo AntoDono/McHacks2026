@@ -1,4 +1,5 @@
 import type { UserData } from "~types/user"
+import { preventDefaultAndStop } from "~utils/events"
 
 import "../styles/content.css"
 
@@ -9,8 +10,7 @@ interface UserInfoProps {
 
 const UserInfo = ({ userData, onClose }: UserInfoProps) => {
   const handleCloseClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    preventDefaultAndStop(e)
     onClose()
   }
 
