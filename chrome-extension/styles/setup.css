@@ -86,14 +86,14 @@
 /* Dropzone Styles */
 #plasmo-image-overlay-root .dropzone {
   all: initial !important;
-  border: 2px dashed #ddd !important;
-  border-radius: 12px !important;
-  padding: 32px !important;
+  border: 2px dashed #d0d0d0 !important;
+  border-radius: 8px !important;
+  padding: 48px 24px !important;
   text-align: center !important;
   cursor: pointer !important;
-  transition: all 0.3s ease !important;
-  background-color: #fafafa !important;
-  min-height: 200px !important;
+  transition: border-color 0.2s ease !important;
+  background-color: white !important;
+  min-height: 160px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -103,13 +103,10 @@
 
 #plasmo-image-overlay-root .dropzone:hover {
   border-color: #999 !important;
-  background-color: #f5f5f5 !important;
 }
 
 #plasmo-image-overlay-root .dropzone-active {
-  border-color: var(--primary) !important;
-  background-color: #f8f8f8 !important;
-  transform: scale(1.02) !important;
+  border-color: #999 !important;
 }
 
 #plasmo-image-overlay-root .dropzone-has-image {
@@ -124,10 +121,8 @@
 }
 
 #plasmo-image-overlay-root .dropzone-processing {
-  border-color: var(--primary) !important;
-  background-color: #f8f8f8 !important;
+  border-color: #999 !important;
   cursor: wait !important;
-  opacity: 0.8 !important;
 }
 
 #plasmo-image-overlay-root .dropzone-content {
@@ -135,24 +130,63 @@
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 0 !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
 
+#plasmo-image-overlay-root .dropzone-icon-wrapper {
+  all: initial !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-bottom: 12px !important;
+}
+
 #plasmo-image-overlay-root .dropzone-icon {
   all: initial !important;
-  font-size: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+  color: #999 !important;
   display: block !important;
+}
+
+#plasmo-image-overlay-root .dropzone-spinner {
+  all: initial !important;
+  width: 40px !important;
+  height: 40px !important;
+  border: 3px solid #f3f3f3 !important;
+  border-top: 3px solid #666 !important;
+  border-radius: 50% !important;
+  animation: spin 1s linear infinite !important;
+  display: block !important;
+  margin-bottom: 12px !important;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 #plasmo-image-overlay-root .dropzone-text {
   all: initial !important;
   font-size: 14px !important;
-  color: #666 !important;
-  margin: 0 !important;
-  line-height: 1.5 !important;
+  color: #333 !important;
+  margin: 0 0 4px 0 !important;
+  line-height: 1.4 !important;
   display: block !important;
+  font-weight: 400 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+#plasmo-image-overlay-root .dropzone-subtext {
+  all: initial !important;
+  font-size: 12px !important;
+  color: #999 !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+  display: block !important;
+  font-weight: 400 !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 

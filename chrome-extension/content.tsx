@@ -6,7 +6,6 @@ import { saveGalleryImages, getUserData } from "~utils/storage"
 import type { UserData } from "~types/user"
 import VirtualTryOnPanel from "~components/VirtualTryOnPanel"
 import TryOnButton from "~components/TryOnButton"
-import Overlay from "~components/Overlay"
 import Setup from "~components/Setup"
 import { useImageHover } from "~hooks/useImageHover"
 import { useButtonPosition } from "~hooks/useButtonPosition"
@@ -31,8 +30,6 @@ const BUTTON_LEAVE_DELAY = 150
 
 const ContentScript = () => {
   const [isHoveringButton, setIsHoveringButton] = useState(false)
-  const [showOverlay, setShowOverlay] = useState(false)
-  const [showSetup, setShowSetup] = useState(false)
   const [showVirtualTryOnPanel, setShowVirtualTryOnPanel] = useState(false)
   const [selectedImages, setSelectedImages] = useState<string[]>([])
   const [userData, setUserData] = useState<UserData | null>(null)
@@ -78,16 +75,20 @@ const ContentScript = () => {
       console.log("Found gallery images:", galleryImages.length, galleryImages)
 
       if (galleryImages.length > 0) {
-        await saveGalleryImages(galleryImages)
-        console.log("Gallery images saved successfully:", galleryImages.length, "images")
+        // Add new images to existing array, avoiding duplicates
+        const newImages = galleryImages.filter(img => !selectedImages.includes(img))
+        const updatedImages = [...selectedImages, ...newImages]
+        
+        await saveGalleryImages(updatedImages)
+        console.log("Gallery images saved successfully:", updatedImages.length, "images")
 
         // Update badge to show new images
         try {
           chrome.runtime.sendMessage(
             {
               type: "GALLERY_IMAGES_UPDATED",
-              images: galleryImages,
-              count: galleryImages.length
+              images: updatedImages,
+              count: updatedImages.length
             },
             (response) => {
               if (chrome.runtime.lastError) {
@@ -99,17 +100,10 @@ const ContentScript = () => {
           console.log("Could not send message (this is normal)")
         }
 
-        // Store selected images
-        setSelectedImages(galleryImages)
-        
-        // Check if user is set up
-        if (!userData?.isSetup) {
-          // Show setup only
-          setShowSetup(true)
-        } else {
-          // Show gallery overlay
-          setShowOverlay(true)
-        }
+        // Update selected images and show sidebar
+        setSelectedImages(updatedImages)
+        setShowVirtualTryOnPanel(true)
+        console.log("Opening panel, userData:", userData, "isSetup:", userData?.isSetup)
         
         setHoveredImage(null)
       } else {
@@ -124,9 +118,7 @@ const ContentScript = () => {
     try {
       const data = await getUserData()
       setUserData(data)
-      // After setup is complete, show the gallery overlay
-      setShowSetup(false)
-      setShowOverlay(true)
+      // Sidebar will automatically show the product images after setup
     } catch (error) {
       console.error("Error loading user data:", error)
     }
@@ -144,8 +136,6 @@ const ContentScript = () => {
       return
     }
 
-    setShowOverlay(false)
-    setShowVirtualTryOnPanel(true)
     setIsLoadingTryOn(true)
 
     try {
@@ -221,54 +211,42 @@ const ContentScript = () => {
         />
       )}
 
-      {showSetup && !userData?.isSetup && (
-        <div
-          className="try-on-overlay"
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setShowSetup(false)
-          }}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <div
-            className="try-on-overlay-content"
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <Setup
-              onSetupComplete={handleSetupComplete}
-              onClose={() => setShowSetup(false)}
+      {showVirtualTryOnPanel && (
+        <>
+          {(!userData || !userData.isSetup) ? (
+            <div className="virtual-try-on-panel">
+              <div className="virtual-try-on-panel-header">
+                <h2 className="virtual-try-on-panel-title">Setup Required</h2>
+                <button
+                  className="virtual-try-on-panel-close"
+                  onClick={() => setShowVirtualTryOnPanel(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="virtual-try-on-panel-content">
+                <Setup
+                  onSetupComplete={handleSetupComplete}
+                  onClose={() => setShowVirtualTryOnPanel(false)}
+                />
+              </div>
+            </div>
+          ) : (
+            <VirtualTryOnPanel
+              userData={userData}
+              productImages={selectedImages}
+              tryOnResultImages={tryOnResultImages}
+              isLoading={isLoadingTryOn}
+              onStartVirtualTryOn={handleStartVirtualTryOn}
+              onClose={() => {
+                setShowVirtualTryOnPanel(false)
+                setTryOnResultImages([])
+                setIsLoadingTryOn(false)
+              }}
+              onImagesChange={(images) => setSelectedImages(images)}
             />
-          </div>
-        </div>
-      )}
-
-      <Overlay
-        showOverlay={showOverlay}
-        selectedImages={selectedImages}
-        userData={userData}
-        onClose={() => setShowOverlay(false)}
-        onStartVirtualTryOn={handleStartVirtualTryOn}
-        onImagesChange={(images) => setSelectedImages(images)}
-      />
-
-      {showVirtualTryOnPanel && userData?.isSetup && (
-        <VirtualTryOnPanel
-          userData={userData}
-          productImages={selectedImages}
-          tryOnResultImages={tryOnResultImages}
-          isLoading={isLoadingTryOn}
-          onClose={() => {
-            setShowVirtualTryOnPanel(false)
-            setTryOnResultImages([])
-            setIsLoadingTryOn(false)
-          }}
-          onImagesChange={(images) => setSelectedImages(images)}
-        />
+          )}
+        </>
       )}
     </>
   )
