@@ -143,6 +143,7 @@ const ContentScript = () => {
         onClose={() => setShowOverlay(false)}
         onSetupComplete={handleSetupComplete}
         onStartVirtualTryOn={handleStartVirtualTryOn}
+        onImagesChange={(images) => setSelectedImages(images)}
       />
 
       {showVirtualTryOnPanel && userData?.isSetup && (
@@ -150,6 +151,7 @@ const ContentScript = () => {
           userData={userData}
           productImages={selectedImages}
           onClose={() => setShowVirtualTryOnPanel(false)}
+          onImagesChange={(images) => setSelectedImages(images)}
         />
       )}
     </>
